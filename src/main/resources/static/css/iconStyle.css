@@ -96,6 +96,52 @@
     box-shadow: 0 6px 14px rgb(154, 154, 154);
 }
 
+.button_dealer_inventory {
+    display: flex;
+    flex-direction: row; /* stack icon + text vertically */
+    align-items: center;     /* center both horizontally */
+    background-color: white;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    padding: 20px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    width: 800px; /* optional: fix width for neat layout */
+    height: 300px;
+}
+
+.button_dealer_inventory img {
+    width: 200px;
+    height: 200px;
+}
+
+.button_dealer_inventory span {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* force text to align left */
+    text-align: left;
+}
+
+.button_dealer_inventory:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 14px rgb(154, 154, 154);
+}
+
+.dealer_inventory_scroll_box {
+    justify-items: center; /* align items to the left horizontally */
+    align-items: start;   /* align items to the top vertically */
+    justify-content: start; /* ensure grid stays aligned to top-left */
+    align-content: start;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(700px, 1fr));
+    gap: 30px;
+    padding: 1px;
+    overflow: scroll;
+    width: 1653px;
+    height: 815px;
+}
+
 .scroll-box {
     justify-items: start; /* align items to the left horizontally */
     align-items: start;   /* align items to the top vertically */
