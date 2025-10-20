@@ -26,7 +26,11 @@ public class EVMVehicleController {
         List<DTOEVMVehicle> vehicles = dao.getAllVehicles();
         model.addAttribute("vehicles", vehicles);
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
         return "evm_vehicle_list"; // tên file JSP hoặc Thymeleaf
+=======
+        return "evmPage/vehicleList";
+>>>>>>> Stashed changes
 =======
         return "evmPage/vehicleList";
 >>>>>>> Stashed changes
