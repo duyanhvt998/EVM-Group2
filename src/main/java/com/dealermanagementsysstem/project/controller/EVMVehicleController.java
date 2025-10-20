@@ -39,7 +39,7 @@ public class EVMVehicleController {
             return "evmPage/vehicleDetail";
         }
         modelAttr.addAttribute("vehicle", vehicle);
-        return "evmPage/vehicleDetail";
+        return "evmPage/vehicleListDetail";
     }
 
     // ===========================
