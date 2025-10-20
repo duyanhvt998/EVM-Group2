@@ -253,4 +253,158 @@ public class DAOEVMVehicle {
         return list;
     }
 
+    public boolean createVehicle(
+            String vin,
+            String modelName,
+            String brand,
+            String bodyType,
+            int year,
+            String description,
+            double basePrice,
+            String versionName,
+            String engine,
+            String transmission,
+            String colorName,
+            java.util.Date manufactureDate,
+            String status,
+            int evmID,
+            String thumbnailPath
+    ) {
+        boolean success = false;
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = DBUtils.getConnection();
+            conn.setAutoCommit(false); // bắt đầu transaction
+
+            int modelID = -1;
+            int colorID = -1;
+            int versionID = -1;
+
+            // 1️⃣ Kiểm tra Model có tồn tại chưa
+            ps = conn.prepareStatement("SELECT ModelID FROM EVM_VehicleModel WHERE ModelName = ?");
+            ps.setString(1, modelName);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                modelID = rs.getInt("ModelID");
+            } else {
+                // tạo model mới
+                ps.close();
+                rs.close();
+                ps = conn.prepareStatement("SELECT ISNULL(MAX(ModelID), 0) + 1 FROM EVM_VehicleModel");
+                rs = ps.executeQuery();
+                if (rs.next()) modelID = rs.getInt(1);
+                ps.close();
+
+                ps = conn.prepareStatement("""
+                            INSERT INTO EVM_VehicleModel (ModelID, ModelName, Brand, BodyType, Year, Description, EvmID, BasePrice, ModelImage)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """);
+                ps.setInt(1, modelID);
+                ps.setString(2, modelName);
+                ps.setString(3, brand);
+                ps.setString(4, bodyType);
+                ps.setInt(5, year);
+                ps.setString(6, description);
+                ps.setInt(7, evmID);
+                ps.setDouble(8, basePrice);
+                ps.setString(9, thumbnailPath);
+                ps.executeUpdate();
+            }
+
+            // 2️⃣ Kiểm tra Color có tồn tại chưa
+            ps.close();
+            ps = conn.prepareStatement("SELECT ColorID FROM EVM_VehicleColor WHERE ColorName = ? AND ModelID = ?");
+            ps.setString(1, colorName);
+            ps.setInt(2, modelID);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                colorID = rs.getInt("ColorID");
+            } else {
+                ps.close();
+                rs.close();
+                ps = conn.prepareStatement("SELECT ISNULL(MAX(ColorID), 0) + 1 FROM EVM_VehicleColor");
+                rs = ps.executeQuery();
+                if (rs.next()) colorID = rs.getInt(1);
+                ps.close();
+
+                ps = conn.prepareStatement("""
+                            INSERT INTO EVM_VehicleColor (ColorID, ModelID, ColorName)
+                            VALUES (?, ?, ?)
+                        """);
+                ps.setInt(1, colorID);
+                ps.setInt(2, modelID);
+                ps.setString(3, colorName);
+                ps.executeUpdate();
+            }
+
+            // 3️⃣ Kiểm tra Version có tồn tại chưa (theo ModelID + VersionName)
+            ps.close();
+            ps = conn.prepareStatement("SELECT VersionID FROM EVM_VehicleVersion WHERE VersionName = ? AND ModelID = ?");
+            ps.setString(1, versionName);
+            ps.setInt(2, modelID);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                versionID = rs.getInt("VersionID");
+            } else {
+                ps.close();
+                rs.close();
+                ps = conn.prepareStatement("SELECT ISNULL(MAX(VersionID), 0) + 1 FROM EVM_VehicleVersion");
+                rs = ps.executeQuery();
+                if (rs.next()) versionID = rs.getInt(1);
+                ps.close();
+
+                ps = conn.prepareStatement("""
+                            INSERT INTO EVM_VehicleVersion (VersionID, ModelID, VersionName, Engine, Transmission, Price)
+                            VALUES (?, ?, ?, ?, ?, ?)
+                        """);
+                ps.setInt(1, versionID);
+                ps.setInt(2, modelID);
+                ps.setString(3, versionName);
+                ps.setString(4, engine);
+                ps.setString(5, transmission);
+                ps.setDouble(6, basePrice); // giá gốc
+                ps.executeUpdate();
+            }
+
+            // 4️⃣ Thêm Vehicle mới
+            ps.close();
+            ps = conn.prepareStatement("""
+                        INSERT INTO EVM_Vehicle (VIN, ModelID, VersionID, ColorID, ManufactureDate, Status, EvmID)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """);
+            ps.setString(1, vin);
+            ps.setInt(2, modelID);
+            ps.setInt(3, versionID);
+            ps.setInt(4, colorID);
+            ps.setDate(5, new java.sql.Date(manufactureDate.getTime()));
+            ps.setString(6, status);
+            ps.setInt(7, evmID);
+            ps.executeUpdate();
+
+            conn.commit();
+            success = true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                if (conn != null) conn.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        } finally {
+            try {
+                if (ps != null) ps.close();
+                if (rs != null) rs.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return success;
+    }
+
 }
