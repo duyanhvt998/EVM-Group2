@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
           integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
-    <link rel="stylesheet" href="/css/vehicleListScrollBox.css">
+    <link rel="stylesheet" href="/css/inentoryScrollBox.css">
 </head>
 
 <body class="bg-gradient2-custom">
@@ -59,10 +59,10 @@
         <div class="d-flex">
 
             <div class="scroll-box">
-                <div class="items-container" th:each="vehicle : ${vehicles}">
+                <div class="items-container">
 
                     <!-- Item -->
-                    <button class="item-button">
+                    <button class="item-button" th:each="vehicle : ${vehicles}">
                         <div class="image-placeholder">🚗</div>
                         <div class="item-info">
                             <div class="model-name"> Model name: <span th:text="${vehicle.model.modelName}"></span> </div>
