@@ -18,7 +18,7 @@ public class EVMVehicleController {
     public String listVehicles(Model model) {
         List<DTOEVMVehicle> vehicles = dao.getAllVehicles();
         model.addAttribute("vehicles", vehicles);
-        return "evm_vehicle_list"; // tên file JSP hoặc Thymeleaf
+        return "evmPage/vehicleList"; // tên file JSP hoặc Thymeleaf
     }
 
     // Hiển thị chi tiết xe
