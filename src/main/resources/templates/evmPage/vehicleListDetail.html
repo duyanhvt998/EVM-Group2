@@ -11,10 +11,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
           integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
-    <link rel="stylesheet" href="/css/inentoryScrollBox.css">
 </head>
 
-<body class="bg-gradient2-custom" style="overflow: hidden;">
+<body class="bg-gradient2-custom">
 
 <button class="mobile-menu-toggle" id="menuToggleBtn">
     <i class="fa-solid fa-bars"></i>
@@ -33,30 +32,37 @@
         <div class="d-flex">
 
             <span>
-                <h1>Vehicle list</h1>
+                <h1>Vehicle detail</h1>
             </span>
 
-            <form action="/searchVehicleListController" method="get">
-                <input name="keyword"
-                       type="text"
-                       class="search-vehicle-list-input-control search-vehicle-list-input mb-1"
-                       placeholder="Search by model name"
-                       th:value="${keyword}"
-                        style="margin-top: 12px;">
-                <button type="submit" class="btn btn-dark rounded-pill">Search</button>
-            </form>
-
-            <a href="/evmCreateANewVehicleToList" style="text-decoration: none">
-                <button class="createNewVehicleButton">
-                    <span>
-                        Create new vehicle
-                    </span>
-                </button>
-            </a>
 
         </div>
 
-        <div th:replace="fragments/vehicleListDealerPageFrag :: fragVehicleListDealer"></div>
+        <div class="vehicle_detail_box">
+
+            <span>
+                <p>VIN: <span></span></p>
+                <p>Color ID: <span></span></p>
+                <p>Manufacture year: <span></span></p>
+                <p>Engine number: <span></span></p>
+                <p>Current owner: <span></span></p>
+                <p>Status: <span></span></p>
+                <p>Model ID: <span></span></p>
+                <p>Version ID: <span></span></p>
+                <p>Model name: <span></span></p>
+                <p>Base price: <span></span></p>
+                <p>Version name: <span></span></p>
+            </span>
+
+        </div>
+
+        <div class="vehicle_detail_box_img_box">
+
+            <span>
+                <img src="images/logo.png">
+            </span>
+
+        </div>
 
     </div>
 

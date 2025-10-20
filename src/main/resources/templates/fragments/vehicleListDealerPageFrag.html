@@ -1,0 +1,27 @@
+<div class="d-flex" th:fragment="fragVehicleListDealer">
+
+    <div class="scroll-box">
+        <div class="items-container">
+
+            <!-- Item  -->
+            <button class="item-button" th:each="vehicle : ${vehicleList}">
+                <div class="image-placeholder">🚗</div>
+                <div class="item-info">
+                    <div class="model-name"> Model name: <span th:text="${vehicle.modelName}"></span> </div>
+                    <div class="info-row">
+                        <div class="info-item">
+                            <span class="info-label">Manufacture year:</span>
+                            <span class="info-value" th:text="${vehicle.manufactureYear}"></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Base price:</span>
+                            <span class="info-value" th:text="${vehicle.basePrice}"></span>
+                        </div>
+                    </div>
+                </div>
+            </button>
+
+        </div>
+    </div>
+
+</div>
