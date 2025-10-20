@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <meta charset="UTF-8">
@@ -13,7 +13,7 @@
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
 </head>
 
-<body class="bg-gradient2-custom" style="overflow:hidden;">
+<body class="bg-gradient2-custom">
 
 <button class="mobile-menu-toggle" id="menuToggleBtn">
     <i class="fa-solid fa-bars"></i>
@@ -23,32 +23,33 @@
 
     <div th:replace="mainPage/navBarFragment :: navBar"></div>
 
-    <div class="mainContent flex-grow-1 p-3" style="overflow: hidden">
+    <div class="mainContent flex-grow-1 p-3">
 
         <div class="d-flex">
-            <h2>This is a navigation link.</h2>
+            <h2>THIS IS A DEALER LINK.</h2>
         </div>
+
+        <h1>Welcome <span style="color: #ff9c5b" th:text="${#authentication.name}">User</span>,</h1>
 
         <div class="d-flex">
 
-            <span>
-                <h1>Vehicle list</h1>
-            </span>
-
-
-
-        </div>
-
-        <div class="scroll-box">
-
-            <div th:each="vehicle : ${vehicleList}" class="d-flex" style="justify-content: center; align-items: center; padding: 35px;">
-                <a href="" style="text-decoration: none">
-                    <button class="button_vehicle_list">
-                        <img src="/images/logo.png">
+            <div class="d-flex flex-wrap justify-content-center p-3" style="justify-content: center; align-items: center; padding: 35px;">
+                <a href="/dealerCustomerManagement" style="text-decoration: none;">
+                    <button class="icon-btn">
+                        <i class="fa-solid fa-folder-plus"></i>
                         <span>
-                            <p th:text="${vehicle.modelName}"></p>
-                            <p th:text="${vehicle.basePrice}"></p>
-                            <p th:text="${vehicle.ManufactureYear}"></p>
+                            Create Discount
+                        </span>
+                    </button>
+                </a>
+            </div>
+
+            <div class="d-flex" style="justify-content: center; align-items: center; padding: 35px;">
+                <a href="/dealerVehiclesInformation" style="text-decoration: none;">
+                    <button class="icon-btn">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span>
+                            Discount List
                         </span>
                     </button>
                 </a>
@@ -64,5 +65,3 @@
 <script src="/scripts/navBarMenuProject.js"></script>
 
 </body>
-
-</html>
