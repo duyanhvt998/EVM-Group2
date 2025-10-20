@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
           integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="/css/vehicleDetail.css">
 </head>
 
 <body class="bg-gradient2-custom">
@@ -40,7 +41,59 @@
 
         <div class="d-flex">
 
+            <div class="container">
+                <div class="title">Vehicle Details</div>
 
+                <div class="info-group">
+                    <span class="label">VIN:</span>
+                    <span class="value vehicle-id" th:text="${vehicle.VIN}"></span>
+                </div>
+
+                <div class="info-group">
+                    <span class="label">Manufacture date:</span>
+                    <span class="value" th:text="${vehicle.VIN}"></span>
+                </div>
+
+                <div class="info-group">
+                    <span class="label">Status:</span>
+                    <span class="value" th:text="${vehicle.VIN}""></span>
+                </div>
+
+                <div class="info-group">
+                    <span class="label">Color name:</span>
+                    <span class="value" th:text="${vehicle.VIN}"></span>
+                </div>
+
+                <div class="info-group">
+                    <span class="label">Model name:</span>
+                    <span class="value" th:text="${vehicle.VIN}"></span>
+                </div>
+
+                <div class="info-group">
+                    <span class="label">Brand:</span>
+                    <span class="value" th:text="${vehicle.VIN}"></span>
+                </div>
+
+                <div class="info-group">
+                    <span class="label">Body type:</span>
+                    <span class="value" th:text="${vehicle.VIN}"></span>
+                </div>
+
+                <div class="info-group">
+                    <span class="label">Year:</span>
+                    <span class="value" th:text="${vehicle.VIN}"></span>
+                </div>
+
+                <div class="info-group">
+                    <span class="label">Description:</span>
+                    <span class="value" th:text="${vehicle.VIN}"></span>
+                </div>
+
+                <div class="info-group">
+                    <span class="label">Base price:</span>
+                    <span class="value" th:text="${vehicle.VIN}"></span>
+                </div>
+            </div>
 
         </div>
 
