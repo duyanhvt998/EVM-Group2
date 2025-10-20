@@ -203,6 +203,31 @@
     max-width: 100%;
 }
 
+.vehicle_detail_box {
+    display: inline-flex;
+    background-color: white;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    padding: 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    width: 900px; /* optional: fix width for neat layout */
+    height: 465px;
+    max-width: 100%;
+}
+
+.vehicle_detail_box_img_box {
+    display: inline-flex;
+    background-color: white;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    padding: 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    width: 465px; /* optional: fix width for neat layout */
+    height: 465px;
+}
+
 /* RESPONSIVE */
 /* TABLET */
 @media (max-width: 1024px) {
