@@ -11,9 +11,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
           integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="/css/beautifulForm.css">
 </head>
 
-<body class="bg-gradient2-custom">
+<body class="bg-gradient2-custom" style="overflow: hidden;">
 
 <button class="mobile-menu-toggle" id="menuToggleBtn">
     <i class="fa-solid fa-bars"></i>
@@ -37,101 +38,96 @@
 
         </div>
 
-        <div class="create-vehicle-form-container">
+        <div class="form-container">
 
-            <form action="/createVehicle" method="post">
-
-                <div class="create-vehicle-form-row">
-                    <label>VIN:</label>
-                    <input name="VIN" type="text" class="create-vehicle-form-input-control create-vehicle-form-input mb-1"
-                               placeholder="" required>
+            <form action="#" method="POST" class="form-form" id="submitForm">
+                <div class="form-group">
+                    <label for="generalID">General ID:</label>
+                    <input type="number" id="generalID" name="generalID" placeholder="Enter general ID" required />
                 </div>
 
-                <div class="create-vehicle-form-row">
-                    <label>Color ID:</label>
-                    <input name="colorId" type="number" class="create-vehicle-form-input-control create-vehicle-form-input mb-1"
-                           placeholder="" required>
+                <div class="form-group">
+                    <label for="vin">VIN:</label>
+                    <input type="text" id="vin" name="VIN" placeholder="Enter vehicle VIN" required />
                 </div>
 
-                <div class="create-vehicle-form-row">
-                    <label>Version ID:</label>
-                    <input name="versionId" type="number" class="create-vehicle-form-input-control create-vehicle-form-input mb-1"
-                           placeholder="" required>
+                <div class="form-group">
+                    <label for="manufactureDate">Manufacture date:</label>
+                    <input type="date" id="manufactureDate" name="manufactureDate" required />
                 </div>
 
-                <div class="create-vehicle-form-row">
-                    <label>Color name:</label>
-                    <input name="colorName" type="text" class="create-vehicle-form-input-control create-vehicle-form-input mb-1"
-                           placeholder="" required>
+                <div class="form-group">
+                    <label for="status">Status:</label>
+                    <input type="text" id="status" name="status" placeholder="Enter vehicle status" required />
                 </div>
 
-                <div class="create-vehicle-form-row">
-                    <label>Manufacture year:</label>
-                    <input name="manufactureYear" type="number" class="create-vehicle-form-input-control create-vehicle-form-input mb-1"
-                           placeholder="" required>
+                <div class="form-group">
+                    <label for="evmID">EVM ID:</label>
+                    <input type="number" id="evmID" name="evmID" placeholder="Enter EVM ID" required />
                 </div>
 
-                <div class="create-vehicle-form-row">
-                    <label>Engine number:</label>
-                    <input name="engineNumber" type="text" class="create-vehicle-form-input-control create-vehicle-form-input mb-1"
-                           placeholder="" required>
+                <div class="form-group">
+                    <label for="colorName">Color name:</label>
+                    <input type="text" id="colorName" name="colorName" placeholder="Enter color name" required />
                 </div>
 
-                <div class="create-vehicle-form-row">
-                    <label>Current owner:</label>
-                    <input name="currentOwner" type="text" class="create-vehicle-form-input-control create-vehicle-form-input mb-1"
-                           placeholder="" required>
+                <div class="form-group">
+                    <label for="hexCode">Hex code:</label>
+                    <input type="text" id="hexCode" name="hexCode" placeholder="Enter hex code" required />
                 </div>
 
-                <div class="create-vehicle-form-row">
-                    <label>Status:</label>
-                    <input name="status" type="text" class="create-vehicle-form-input-control create-vehicle-form-input mb-1"
-                           placeholder="" required>
+                <div class="form-group">
+                    <label for="modelName">Model name:</label>
+                    <input type="text" id="modelName" name="modelName" placeholder="Enter model name" required />
                 </div>
 
-                <div class="create-vehicle-form-row">
-                    <label>Model ID:</label>
-                    <input name="modelId" type="number" class="create-vehicle-form-input-control create-vehicle-form-input mb-1"
-                           placeholder="" required>
+                <div class="form-group">
+                    <label for="brand">Brand:</label>
+                    <input type="text" id="brand" name="brand" placeholder="Enter brand" required />
                 </div>
 
-                <div class="create-vehicle-form-row">
-                    <label>Model name:</label>
-                    <input name="modelName" type="text" class="create-vehicle-form-input-control create-vehicle-form-input mb-1"
-                           placeholder="" required>
+                <div class="form-group">
+                    <label for="bodyType">Body type:</label>
+                    <input type="text" id="bodyType" name="bodyType" placeholder="Enter body type" required />
                 </div>
 
-                <div class="create-vehicle-form-row">
-                    <label>Base price:</label>
-                    <input name="basePrice" type="number" class="create-vehicle-form-input-control create-vehicle-form-input mb-1"
-                           placeholder="" required>
+                <div class="form-group">
+                    <label for="year">Year:</label>
+                    <input type="number" id="year" name="year" placeholder="Enter year" required />
                 </div>
 
-                <div class="create-vehicle-form-row">
-                    <label>Version name:</label>
-                    <input name="versionName" type="text" class="create-vehicle-form-input-control create-vehicle-form-input mb-1"
-                           placeholder="" required>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <input type="text" id="description" name="description" placeholder="Enter description" required />
                 </div>
 
-                <div class="create-vehicle-form-row">
-                    <label>Vehicle image:</label>
-                    <input name="versionName"
-                           type="file"
-                           accept="image/*"
-
-                           placeholder="" required>
+                <div class="form-group">
+                    <label for="basePrice">Base price:</label>
+                    <input type="text" id="basePrice" name="basePrice" placeholder="Enter base price" required />
                 </div>
 
-                <div class="create-vehicle-form-row">
-                    <label></label>
-                    <button type="submit" class="btn btn-dark rounded-pill">Create</button>
+                <div class="form-group">
+                    <label for="versionName">Version name:</label>
+                    <input type="text" id="versionName" name="versionName" placeholder="Enter version name" required />
                 </div>
 
+                <div class="form-group">
+                    <label for="engine">Engine:</label>
+                    <input type="text" id="engine" name="engine" placeholder="Enter engine" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="transmission">Transmission:</label>
+                    <input type="text" id="transmission" name="transmission" placeholder="Enter transmission" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="image">Vehicle thumbnail:</label>
+                    <input type="file" id="image" name="image" accept="image/*" required />
+                </div>
             </form>
 
-            <div th:if="${error}" class="alert alert-danger mt-3" role="alert">
-                <span th:text="${error}"></span>
-            </div>
+            <button type="submit" form="submitForm">Create</button>
 
         </div>
 
