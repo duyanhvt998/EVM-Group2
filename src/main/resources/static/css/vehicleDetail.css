@@ -1,9 +1,56 @@
-.container {
-    background: linear-gradient(135deg, #fff 0%, #f9f9f9 100%);
+.detail-container {
+    background: white;
     border-radius: 20px;
     padding: 60px;
+    width: 1025px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+}
+
+.scroll-box-vehicle-details {
+    justify-items: start; /* align items to the left horizontally */
+    align-items: start;   /* align items to the top vertically */
+    justify-content: start; /* ensure grid stays aligned to top-left */
+    align-content: start;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    padding: 1px;
+    overflow: scroll;
     width: 100%;
-    max-width: 700px;
+    height: 880px;
+}
+
+.right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    align-items: flex-start;
+}
+
+.left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    align-items: flex-start;
+}
+
+.image-container {
+    background: white;
+    border-radius: 20px;
+    padding: 60px;
+    width: 550px;
+    height: 550px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+}
+
+.actions-container {
+    background: white;
+    border-radius: 20px;
+    padding: 60px;
+    width: 550px;
+    height: auto;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
     border: 1px solid #e0e0e0;
 }
@@ -56,4 +103,28 @@
 .vehicle-id {
     color: #333;
     font-size: 16px;
+}
+
+.rounded-btn {
+    background: linear-gradient(135deg, #ff8c00, #ff6200);
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 10px 22px; /* scales based on text length */
+    border: none;
+    border-radius: 999px; /* fully rounded edges */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.rounded-btn:hover {
+    background: linear-gradient(135deg, #ffa733, #ff7b00);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+}
+
+.rounded-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
 }
