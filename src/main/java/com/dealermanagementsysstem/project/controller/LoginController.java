@@ -32,7 +32,7 @@ public class LoginController {
             model.addAttribute("successMessage", "Đăng xuất thành công!");
         }
         
-        return "mainPage/loginPage";
+        return "mainPage/loginPageV2";
     }
 
     // Default success handler - redirect based on user role
@@ -50,6 +50,6 @@ public class LoginController {
             };
         }
         
-        return "redirect:/login";
+        return "redirect:/loginPageV2";
     }
 }
