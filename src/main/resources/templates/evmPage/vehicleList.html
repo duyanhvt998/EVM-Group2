@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
           integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <link rel="stylesheet" href="/css/inentoryScrollBox.css">
 </head>
 
 <body class="bg-gradient2-custom">
@@ -55,19 +56,40 @@
 
         </div>
 
-        <div class="scroll-box">
+        <div class="d-flex">
 
-            <div th:each="vehicle : ${vehicleList}" class="d-flex" style="justify-content: center; align-items: center; padding: 35px;">
-                <a href="/showTestVehicleDetail" style="text-decoration: none">
-                    <button class="button_vehicle_list">
-                        <img src="/images/logo.png">
-                        <span>
-                            <p th:text="${vehicle.modelName}"></p>
-                            <p th:text="${vehicle.basePrice}"></p>
-                            <p th:text="${vehicle.ManufactureYear}"></p>
-                        </span>
+            <div class="scroll-box">
+                <div class="items-container">
+
+                    <!-- Item -->
+                    <button class="item-button" th:each="vehicle : ${vehicles}">
+                        <div class="image-placeholder">🚗</div>
+                        <div class="item-info">
+                            <div class="model-name"> Model name: <span th:text="${vehicle.model.modelName}"></span> </div>
+                            <div class="info-row">
+                                <div class="info-item">
+                                    <span class="info-label">Brand:</span>
+                                    <span class="info-value"><span th:text="${vehicle.model.brand}"></span></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Year:</span>
+                                    <span class="info-value"><span th:text="${vehicle.model.year}"></span></span>
+                                </div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-item">
+                                    <span class="info-label">Version:</span>
+                                    <span class="info-value"><span th:text="${vehicle.version.versionName}"></span></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Engine:</span>
+                                    <span class="info-value"><span th:text="${vehicle.version.engine}"></span></span>
+                                </div>
+                            </div>
+                        </div>
                     </button>
-                </a>
+
+                </div>
             </div>
 
         </div>
