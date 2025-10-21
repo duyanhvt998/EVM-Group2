@@ -108,7 +108,11 @@
             <div class="right-column">
 
                 <div class="image-container">
-
+                    <img th:if="${vehicle.model.modelImage != null}"
+                         th:src="@{/evm/vehicle/showImage/{vin}(vin=${vehicle.VIN})}"
+                         alt="Model Image"
+                         class="vehicle-image">
+                    <span th:if="${vehicle.model.modelImage == null}">🚗</span>
                 </div>
 
                 <div class="actions-container">
