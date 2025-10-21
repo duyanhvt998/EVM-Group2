@@ -1,6 +1,6 @@
 .gradient-body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #ffe0c8 0%, #ffcaaa 100%);
+    background: linear-gradient(135deg, #ffe0c8 0%, #ff9552 100%);
     min-height: 100vh;
     overflow-x: hidden;
 }
