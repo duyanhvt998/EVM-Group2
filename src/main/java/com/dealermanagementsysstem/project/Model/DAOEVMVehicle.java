@@ -233,8 +233,8 @@ public class DAOEVMVehicle {
     }
 
     // ======================================================
-    // CREATE VEHICLE (FIXED)
-    // ======================================================
+// CREATE VEHICLE (FIXED)
+// ======================================================
     public boolean createVehicle(
             String vin,
             String modelName,
@@ -250,13 +250,11 @@ public class DAOEVMVehicle {
             java.util.Date manufactureDate,
             String status,
             int evmID,
-            String thumbnailPath
+            byte[] thumbnailBytes // ✅ đổi từ String sang byte[]
     ) {
         boolean success = false;
         try (Connection conn = DBUtils.getConnection()) {
             conn.setAutoCommit(false);
-
-            System.out.println("=== [DEBUG] Creating new Vehicle ===");
 
             int modelID = -1;
             int colorID = -1;
@@ -281,17 +279,7 @@ public class DAOEVMVehicle {
                         ins.setString(5, description);
                         ins.setInt(6, evmID);
                         ins.setDouble(7, basePrice);
-
-                        // ✅ Đọc file ảnh thành byte[]
-                        byte[] imageBytes = null;
-                        if (thumbnailPath != null && !thumbnailPath.isBlank()) {
-                            try {
-                                imageBytes = java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(thumbnailPath));
-                            } catch (Exception ex) {
-                                System.out.println("[WARN] Cannot read image file: " + thumbnailPath);
-                            }
-                        }
-                        ins.setBytes(8, imageBytes); // set null nếu không có ảnh
+                        ins.setBytes(8, thumbnailBytes); // ✅ ghi trực tiếp byte[]
 
                         ins.executeUpdate();
                         ResultSet gen = ins.getGeneratedKeys();
@@ -364,12 +352,12 @@ public class DAOEVMVehicle {
 
             conn.commit();
             success = true;
-            System.out.println("=== [DEBUG] Vehicle created successfully ===");
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return success;
     }
+
 
 }
