@@ -4,6 +4,7 @@ import utils.DBUtils;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.math.BigDecimal;
 
 public class DAOEVMVehicle {
 
@@ -47,8 +48,8 @@ public class DAOEVMVehicle {
                         rs.getInt("Year"),
                         rs.getString("Description"),
                         rs.getInt("EvmID"),
-                        rs.getDouble("BasePrice"),
-                        rs.getBytes("ModelImage"), // ✅ FIX: getBytes
+                        rs.getBigDecimal("BasePrice"), // ✅ FIX
+                        rs.getBytes("ModelImage"),
                         rs.getObject("MergedToID", Integer.class)
                 );
 
@@ -58,7 +59,7 @@ public class DAOEVMVehicle {
                         rs.getString("VersionName"),
                         rs.getString("Engine"),
                         rs.getString("Transmission"),
-                        rs.getDouble("Price")
+                        rs.getBigDecimal("Price") // ✅ FIX
                 );
 
                 DTOEVMVehicleColor color = new DTOEVMVehicleColor(
@@ -122,8 +123,8 @@ public class DAOEVMVehicle {
                             rs.getInt("Year"),
                             rs.getString("Description"),
                             rs.getInt("EvmID"),
-                            rs.getDouble("BasePrice"),
-                            rs.getBytes("ModelImage"), // ✅ FIX
+                            rs.getBigDecimal("BasePrice"), // ✅ FIX
+                            rs.getBytes("ModelImage"),
                             rs.getObject("MergedToID", Integer.class)
                     );
 
@@ -133,7 +134,7 @@ public class DAOEVMVehicle {
                             rs.getString("VersionName"),
                             rs.getString("Engine"),
                             rs.getString("Transmission"),
-                            rs.getDouble("Price")
+                            rs.getBigDecimal("Price") // ✅ FIX
                     );
 
                     DTOEVMVehicleColor color = new DTOEVMVehicleColor(
@@ -197,8 +198,8 @@ public class DAOEVMVehicle {
                             rs.getInt("Year"),
                             rs.getString("Description"),
                             rs.getInt("EvmID"),
-                            rs.getDouble("BasePrice"),
-                            rs.getBytes("ModelImage"), // ✅ FIX
+                            rs.getBigDecimal("BasePrice"), // ✅ FIX
+                            rs.getBytes("ModelImage"),
                             rs.getObject("MergedToID", Integer.class)
                     );
 
@@ -208,7 +209,7 @@ public class DAOEVMVehicle {
                             rs.getString("VersionName"),
                             rs.getString("Engine"),
                             rs.getString("Transmission"),
-                            rs.getDouble("Price")
+                            rs.getBigDecimal("Price") // ✅ FIX
                     );
 
                     DTOEVMVehicleColor color = new DTOEVMVehicleColor(
@@ -232,7 +233,7 @@ public class DAOEVMVehicle {
     }
 
     // ======================================================
-    // CREATE VEHICLE (fixed)
+    // CREATE VEHICLE
     // ======================================================
     public boolean createVehicle(
             String vin,
@@ -241,7 +242,7 @@ public class DAOEVMVehicle {
             String bodyType,
             int year,
             String description,
-            double basePrice,
+            BigDecimal basePrice, // ✅ đổi double -> BigDecimal
             String versionName,
             String engine,
             String transmission,
@@ -278,7 +279,7 @@ public class DAOEVMVehicle {
                         ins.setInt(4, year);
                         ins.setString(5, description);
                         ins.setInt(6, evmID);
-                        ins.setDouble(7, basePrice);
+                        ins.setBigDecimal(7, basePrice); // ✅ FIX
                         ins.setBytes(8, thumbnailBytes);
                         ins.executeUpdate();
 
@@ -327,7 +328,7 @@ public class DAOEVMVehicle {
                         ins.setString(2, versionName);
                         ins.setString(3, engine);
                         ins.setString(4, transmission);
-                        ins.setDouble(5, basePrice);
+                        ins.setBigDecimal(5, basePrice); // ✅ FIX
                         ins.executeUpdate();
                         ResultSet gen = ins.getGeneratedKeys();
                         if (gen.next()) versionID = gen.getInt(1);

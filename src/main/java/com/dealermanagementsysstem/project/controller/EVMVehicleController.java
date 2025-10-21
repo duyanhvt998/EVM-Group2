@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.*;
 import java.util.Date;
 import java.util.List;
@@ -92,7 +93,7 @@ public class EVMVehicleController {
             @RequestParam("bodyType") String bodyType,
             @RequestParam("year") int year,
             @RequestParam("description") String description,
-            @RequestParam("basePrice") double basePrice,
+            @RequestParam("basePrice") BigDecimal basePrice,
             @RequestParam("versionName") String versionName,
             @RequestParam("engine") String engine,
             @RequestParam("transmission") String transmission,
