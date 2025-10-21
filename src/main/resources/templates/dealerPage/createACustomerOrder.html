@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
@@ -30,16 +30,17 @@
         </div>
 
         <div class="d-flex">
-
             <span>
                 <h1>Create a new customer order</h1>
             </span>
-
         </div>
 
         <div class="d-flex create-vehicle-form-container">
 
-            <form action="/saleorder/insert" method="post">
+            <!-- ✅ FORM CÓ CSRF TOKEN -->
+            <form th:action="@{/saleorder/insert}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
                 <div class="create-vehicle-form-row">
                     <label>Customer ID:</label>
                     <input name="customerID" type="text" class="create-vehicle-form-input mb-1" required>
@@ -61,40 +62,14 @@
                 </div>
 
                 <div class="create-vehicle-form-row">
-<<<<<<< HEAD
-                    <label>Birth date</label>
-                    <input name="BirthDate" type="date" class="create-vehicle-form-input mb-1" required>
-                </div>
-
-                <div class="create-vehicle-form-row">
-                    <label>Created at</label>
-                    <input name="CreateAt" type="datetime-local" class="create-vehicle-form-input mb-1" required>
-                </div>
-
-                <div class="create-vehicle-form-row">
-                    <label>Note</label>
-                    <input name="Note" type="text" class="create-vehicle-form-input mb-1">
-                </div>
-
-                <div class="create-vehicle-form-row">
-                    <label>Test drive schedule</label>
-                    <input name="TestDriveSchedule" type="datetime-local" class="create-vehicle-form-input mb-1">
-                </div>
-
-                <div class="create-vehicle-form-row">
-                    <label>Vehicle of interest</label>
-                    <input type="text" id="VehicleInterest" name="VehicleInterest" class="form-control"
-                           th:value="${vehicleName}" required>
-=======
                     <label>Status:</label>
                     <input name="status" type="text" class="create-vehicle-form-input mb-1" required>
->>>>>>> df1ed2ccc7500127c11108b01db2a2c0f04cf48b
                 </div>
 
                 <button type="submit" class="btn btn-dark rounded-pill">Create</button>
             </form>
 
-
+            <!-- 🟢 Thông báo lỗi -->
             <div th:if="${error}" class="alert alert-danger mt-3" role="alert">
                 <span th:text="${error}"></span>
             </div>
@@ -109,5 +84,4 @@
 <script src="/scripts/navBarMenuProject.js"></script>
 
 </body>
-
 </html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dealer Management</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+
+    <script>
+        // 🟡 Hiển thị dữ liệu Dealer lên form khi nhấn "Edit"
+        function editDealer(button) {
+            document.getElementById("dealerId").value = button.getAttribute("data-id");
+            document.getElementById("dealerName").value = button.getAttribute("data-name");
+            document.getElementById("address").value = button.getAttribute("data-address");
+            document.getElementById("phone").value = button.getAttribute("data-phone");
+            document.getElementById("email").value = button.getAttribute("data-email");
+            document.getElementById("evmID").value = button.getAttribute("data-evm");
+            document.getElementById("levelID").value = button.getAttribute("data-level");
+            document.getElementById("policyID").value = button.getAttribute("data-policy");
+
+            document.getElementById("formTitle").innerText = "Update Dealer";
+            document.getElementById("submitButton").innerText = "Update Dealer";
+
+            // 🟢 Cập nhật đúng action khi nhấn Edit
+            document.getElementById("dealerForm").action = "/dealer/" + button.getAttribute("data-id") + "/update";
+        }
+
+        // 🟢 Reset form về trạng thái thêm mới
+        function resetForm() {
+            document.getElementById("dealerForm").reset();
+            document.getElementById("dealerId").value = "";
+            document.getElementById("formTitle").innerText = "Add New Dealer";
+            document.getElementById("submitButton").innerText = "Add Dealer";
+            document.getElementById("dealerForm").action = "/dealer/create";
+        }
+
+        // 🟢 Tự động ẩn thông báo sau 3 giây
+        document.addEventListener("DOMContentLoaded", function() {
+            const alertBox = document.querySelector(".alert");
+            if (alertBox) {
+                setTimeout(() => {
+                    alertBox.classList.remove("show");
+                    alertBox.classList.add("fade");
+                }, 3000);
+            }
+        });
+    </script>
+</head>
+
+<body class="bg-light p-4">
+<div class="container">
+    <h2 class="mb-3">Dealer Management</h2>
+
+    <!-- 🟢 Hiển thị thông báo -->
+    <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${message}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- 🟢 Form Thêm / Cập nhật Dealer -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h5 id="formTitle" class="card-title mb-3">Add New Dealer</h5>
+
+            <!-- 🔹 Fix CSRF và dealerID -->
+            <form id="dealerForm" action="/dealer/create" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <input type="hidden" id="dealerId" name="dealerID">
+
+                <div class="row g-2">
+                    <div class="col"><input id="dealerName" name="dealerName" class="form-control" placeholder="Dealer Name" required></div>
+                    <div class="col"><input id="address" name="address" class="form-control" placeholder="Address"></div>
+                    <div class="col"><input id="phone" name="phone" class="form-control" placeholder="Phone"></div>
+                    <div class="col"><input id="email" name="email" class="form-control" placeholder="Email"></div>
+                    <div class="col"><input id="evmID" name="evmID" type="number" class="form-control" placeholder="EVM ID"></div>
+                    <div class="col"><input id="levelID" name="levelID" type="number" class="form-control" placeholder="Level ID"></div>
+                    <div class="col"><input id="policyID" name="policyID" type="number" class="form-control" placeholder="Policy ID"></div>
+                    <div class="col-auto d-flex gap-2">
+                        <button id="submitButton" class="btn btn-success" type="submit">Add Dealer</button>
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">Reset</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 🟢 Bảng hiển thị danh sách Dealer -->
+    <table class="table table-bordered table-hover bg-white align-middle">
+        <thead class="table-primary text-center">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Address</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>EVM ID</th>
+            <th>Level ID</th>
+            <th>Policy ID</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="dealer : ${dealers}">
+            <td th:text="${dealer.dealerID}" class="text-center"></td>
+            <td th:text="${dealer.dealerName}"></td>
+            <td th:text="${dealer.address}"></td>
+            <td th:text="${dealer.phone}"></td>
+            <td th:text="${dealer.email}"></td>
+            <td th:text="${dealer.evmID}" class="text-center"></td>
+            <td th:text="${dealer.levelID}" class="text-center"></td>
+            <td th:text="${dealer.policyID}" class="text-center"></td>
+            <td class="text-center">
+                <!-- 🟡 Nút Edit -->
+                <button class="btn btn-warning btn-sm"
+                        th:attr="data-id=${dealer.dealerID},
+                                 data-name=${dealer.dealerName},
+                                 data-address=${dealer.address},
+                                 data-phone=${dealer.phone},
+                                 data-email=${dealer.email},
+                                 data-evm=${dealer.evmID},
+                                 data-level=${dealer.levelID},
+                                 data-policy=${dealer.policyID}"
+                        onclick="editDealer(this)">
+                    Edit
+                </button>
+
+                <!-- 🟥 Fix CSRF cho Delete -->
+                <form th:action="@{'/dealer/' + ${dealer.dealerID} + '/delete'}" method="post" style="display:inline">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                    <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
