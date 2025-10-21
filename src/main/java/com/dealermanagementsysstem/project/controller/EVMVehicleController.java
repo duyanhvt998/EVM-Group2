@@ -25,7 +25,6 @@ public class EVMVehicleController {
     public String listVehicles(@RequestParam(value = "keyword", required = false) String keyword, Model model) {
         List<DTOEVMVehicle> vehicles;
 
-        // Nếu có từ khóa tìm kiếm → gọi hàm search
         if (keyword != null && !keyword.trim().isEmpty()) {
             vehicles = dao.searchVehiclesByModelName(keyword);
             model.addAttribute("keyword", keyword);
@@ -34,7 +33,7 @@ public class EVMVehicleController {
         }
 
         model.addAttribute("vehicles", vehicles);
-        return "evmPage/vehicleList"; // ✅ đúng với HTML vehicle list
+        return "evmPage/vehicleList";
     }
 
     // ===========================
@@ -45,7 +44,7 @@ public class EVMVehicleController {
         DTOEVMVehicle vehicle = dao.getVehicleByVIN(vin);
         if (vehicle == null) {
             model.addAttribute("error", "Vehicle not found for VIN: " + vin);
-            return "evmPage/vehicleList"; // quay lại list nếu không tìm thấy
+            return "evmPage/vehicleList";
         }
         model.addAttribute("vehicle", vehicle);
         return "evmPage/vehicleListDetail";
@@ -56,7 +55,7 @@ public class EVMVehicleController {
     // ===========================
     @GetMapping("/create")
     public String showCreateForm() {
-        return "evmPage/createANewVehicleToList"; // ✅ form HTML của bạn
+        return "evmPage/createANewVehicleToList";
     }
 
     // ===========================
@@ -83,7 +82,7 @@ public class EVMVehicleController {
     ) {
         try {
             // === Upload thumbnail (nếu có) ===
-            String thumbnailPath = null;
+            byte[] thumbnailBytes = null;
             if (thumbnail != null && !thumbnail.isEmpty()) {
                 String uploadDir = "src/main/resources/static/uploads/vehicle/";
                 String fileName = System.currentTimeMillis() + "_" + thumbnail.getOriginalFilename();
@@ -93,9 +92,11 @@ public class EVMVehicleController {
                     Files.createDirectories(uploadPath);
                 }
 
-                Files.copy(thumbnail.getInputStream(), uploadPath.resolve(fileName),
-                        StandardCopyOption.REPLACE_EXISTING);
-                thumbnailPath = "/uploads/vehicle/" + fileName;
+                Path filePath = uploadPath.resolve(fileName);
+                Files.copy(thumbnail.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+                // ✅ Đọc file thành byte[]
+                thumbnailBytes = Files.readAllBytes(filePath);
             }
 
             // === Gọi DAO xử lý thêm mới ===
@@ -103,14 +104,13 @@ public class EVMVehicleController {
                     vin, modelName, brand, bodyType, year,
                     description, basePrice, versionName,
                     engine, transmission, colorName,
-                    manufactureDate, status, evmID, thumbnailPath
+                    manufactureDate, status, evmID, thumbnailBytes
             );
 
-            // === Kiểm tra kết quả ===
             if (!created) {
                 model.addAttribute("success", false);
                 model.addAttribute("message", "❌ Failed to create vehicle. Please try again.");
-                return "evmPage/createANewVehicleToList"; // quay lại form nếu lỗi
+                return "evmPage/createANewVehicleToList";
             }
 
         } catch (IOException e) {
@@ -125,8 +125,6 @@ public class EVMVehicleController {
             return "evmPage/createANewVehicleToList";
         }
 
-        // ✅ Thành công → quay lại danh sách xe
         return "redirect:/evm/vehicle/list";
     }
-
 }
