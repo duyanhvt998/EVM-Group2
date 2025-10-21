@@ -93,4 +93,20 @@ public class DAOAccount {
             return false;
         }
     }
+
+    public Integer getDealerIdByEmail(String email) {
+        String sql = "SELECT DealerID FROM Account WHERE Email = ?";
+        try (Connection conn = DBUtils.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("DealerID");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }
