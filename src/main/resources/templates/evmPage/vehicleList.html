@@ -66,7 +66,13 @@
 
                         <a href="" style="text-decoration: none;" th:href="@{/evm/vehicle/detail/{vin}(vin=${vehicle.VIN})}">
                             <button class="item-button" >
-                                <div class="image-placeholder">🚗</div>
+                                <div class="image-placeholder">
+                                    <img th:if="${vehicle.model.modelImage != null}"
+                                         th:src="@{/evm/vehicle/showImage/{vin}(vin=${vehicle.VIN})}"
+                                         alt="Model Image"
+                                         class="vehicle-image">
+                                    <span th:if="${vehicle.model.modelImage == null}">🚗</span>
+                                </div>
                                 <div class="item-info">
                                     <div class="model-name"> Model name: <span th:text="${vehicle.model.modelName}"></span> </div>
                                     <div class="info-row">

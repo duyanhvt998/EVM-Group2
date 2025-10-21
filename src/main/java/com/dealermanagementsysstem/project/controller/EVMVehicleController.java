@@ -1,5 +1,10 @@
 package com.dealermanagementsysstem.project.controller;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
 import com.dealermanagementsysstem.project.Model.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
@@ -35,6 +40,27 @@ public class EVMVehicleController {
         model.addAttribute("vehicles", vehicles);
         return "evmPage/vehicleList";
     }
+
+    @GetMapping("/showImage/{vin}")
+    @ResponseBody
+    public ResponseEntity<byte[]> getVehicleImage(@PathVariable String vin) {
+
+        DTOEVMVehicle vehicle = dao.getVehicleByVIN(vin);
+        DTOEVMVehicleModel model = vehicle.getModel();
+
+        if (model == null || model.getModelImage() == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        byte[] imageData = model.getModelImage();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.IMAGE_JPEG); // Change to IMAGE_PNG if necessary
+
+        return new ResponseEntity<>(imageData, headers, HttpStatus.OK);
+    }
+
+
 
     // ===========================
     // 2️⃣ Chi tiết xe theo VIN
