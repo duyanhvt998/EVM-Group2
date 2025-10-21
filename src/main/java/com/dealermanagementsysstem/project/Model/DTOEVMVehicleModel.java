@@ -1,5 +1,7 @@
 package com.dealermanagementsysstem.project.Model;
 
+import java.util.Base64;
+
 public class DTOEVMVehicleModel {
 
     private int modelID;
@@ -10,14 +12,14 @@ public class DTOEVMVehicleModel {
     private String description;
     private int evmID;
     private double basePrice;
-    private String modelImage;
-    private Integer mergedToID; // có thể null, nên để Integer
+    private byte[] modelImage; // ✅ đúng kiểu byte[]
+    private Integer mergedToID; // có thể null
 
     public DTOEVMVehicleModel() {
     }
 
     public DTOEVMVehicleModel(int modelID, String modelName, String brand, String bodyType, int year,
-                              String description, int evmID, double basePrice, String modelImage, Integer mergedToID) {
+                              String description, int evmID, double basePrice, byte[] modelImage, Integer mergedToID) {
         this.modelID = modelID;
         this.modelName = modelName;
         this.brand = brand;
@@ -94,11 +96,12 @@ public class DTOEVMVehicleModel {
         this.basePrice = basePrice;
     }
 
-    public String getModelImage() {
+    // ✅ getter/setter đúng kiểu byte[]
+    public byte[] getModelImage() {
         return modelImage;
     }
 
-    public void setModelImage(String modelImage) {
+    public void setModelImage(byte[] modelImage) {
         this.modelImage = modelImage;
     }
 
@@ -110,9 +113,15 @@ public class DTOEVMVehicleModel {
         this.mergedToID = mergedToID;
     }
 
+    // ✅ Dùng cho Thymeleaf hiển thị ảnh
+    public String getModelImageBase64() {
+        if (modelImage == null || modelImage.length == 0) return null;
+        return Base64.getEncoder().encodeToString(modelImage);
+    }
+
     @Override
     public String toString() {
-        return "VehicleModel{" +
+        return "DTOEVMVehicleModel{" +
                 "modelID=" + modelID +
                 ", modelName='" + modelName + '\'' +
                 ", brand='" + brand + '\'' +
@@ -121,10 +130,8 @@ public class DTOEVMVehicleModel {
                 ", description='" + description + '\'' +
                 ", evmID=" + evmID +
                 ", basePrice=" + basePrice +
-                ", modelImage='" + modelImage + '\'' +
+                ", modelImage=" + (modelImage != null ? "[BLOB]" : "null") +
                 ", mergedToID=" + mergedToID +
                 '}';
     }
 }
-
-
