@@ -45,6 +45,7 @@ public class DealerPriceAdjustmentController {
             discounts = daoDiscount.searchByPromotionNameAndDealer(keyword, dealerID);
             model.addAttribute("keyword", keyword);
         } else {
+            System.out.println(daoAccount.getDealerIdByEmail(email));
             discounts = daoDiscount.getDiscountsByDealer(dealerID);
         }
 

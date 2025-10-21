@@ -74,10 +74,10 @@
 
                 <h1>Discount Management</h1>
 
-                <form id="searchDiscountForm">
+                <form id="searchDiscountForm" action="/discount">
                     <div class="form-group">
                         <label for="promoName">Search by promotion name:</label>
-                        <input type="text" id="promoName" name="promoName" placeholder="Enter promotion name" required>
+                        <input type="text" id="promoName" name="keyword" placeholder="Enter promotion name" required th:value="${keyword}">
                     </div>
 
                     <button type="submit" class="submit-btn">Search</button>
