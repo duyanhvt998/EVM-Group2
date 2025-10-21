@@ -41,24 +41,7 @@ public class EVMVehicleController {
         return "evmPage/vehicleList";
     }
 
-    @GetMapping("/showImage/{vin}")
-    @ResponseBody
-    public ResponseEntity<byte[]> getVehicleImage(@PathVariable String vin) {
 
-        DTOEVMVehicle vehicle = dao.getVehicleByVIN(vin);
-        DTOEVMVehicleModel model = vehicle.getModel();
-
-        if (model == null || model.getModelImage() == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        byte[] imageData = model.getModelImage();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_JPEG); // Change to IMAGE_PNG if necessary
-
-        return new ResponseEntity<>(imageData, headers, HttpStatus.OK);
-    }
 
 
 
