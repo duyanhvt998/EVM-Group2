@@ -14,6 +14,7 @@
 }
 
 .right-column {
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 40px;
@@ -21,6 +22,7 @@
 }
 
 .left-column {
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 40px;
@@ -38,7 +40,7 @@
     animation: slideUp 0.8s ease-out;
     position: relative;
     overflow: hidden;
-    width: 800px;
+    width: 100%;
 }
 
 .form-wrapper::before {
@@ -67,8 +69,8 @@
     animation: slideUp 0.8s ease-out;
     position: relative;
     overflow: hidden;
-    width: 800px;
-    height: 1000px;
+    width: 100%;
+    height: auto;
 }
 
 .discount-list-box::before {
