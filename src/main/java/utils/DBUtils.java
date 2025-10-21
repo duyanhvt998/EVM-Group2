@@ -24,18 +24,13 @@ public class DBUtils {
     private static final String DEFAULT_DB_URL = "jdbc:sqlserver://localhost:1433;databaseName=CarDealerDBI;encrypt=true;trustServerCertificate=true";
     private static final String DEFAULT_USER = "sa";
     private static final String DEFAULT_PASS = "12345";
-
     public static Connection getConnection() {
         Connection conn = null;
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-
-            // 1) Try explicit system properties first (recommended for runtime override)
             String url = System.getProperty("db.url");
             String user = System.getProperty("db.username");
             String pass = System.getProperty("db.password");
-
-            // 2) Fall back to SPRING datasource env vars (Spring Boot exposes them as env vars for the JVM)
             if (url == null || url.isBlank()) {
                 url = System.getenv("SPRING_DATASOURCE_URL");
             }
@@ -50,10 +45,7 @@ public class DBUtils {
             if (url == null || url.isBlank()) url = DEFAULT_DB_URL;
             if (user == null || user.isBlank()) user = DEFAULT_USER;
             if (pass == null || pass.isBlank()) pass = DEFAULT_PASS;
-
             conn = DriverManager.getConnection(url, user, pass);
-            // For debug during development
-            // System.out.println("DB connected: " + url + " user=" + user);
         } catch (ClassNotFoundException e) {
             System.err.println("JDBC Driver not found: " + e.getMessage());
         } catch (SQLException e) {
@@ -61,7 +53,6 @@ public class DBUtils {
         }
         return conn;
     }
-
     public static PreparedStatement createPreparedStatement(String sql) throws SQLException {
         Connection conn = getConnection();
         return conn.prepareStatement(sql);

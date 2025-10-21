@@ -2,9 +2,12 @@ package com.dealermanagementsysstem.project.controller;
 
 import com.dealermanagementsysstem.project.Model.*;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -119,4 +122,16 @@ public class OrderController {
         model.addAttribute("order", order);
         return "dealerPage/saleOrderDetail"; // 👉 trang chi tiết đơn hàng
     }
+    @Autowired
+    private DAODealer daoDealer;
+
+    @GetMapping("/order/create")
+    public String createOrderForm(Model model) throws SQLException {
+        List<DTODealer> dealerList = daoDealer.getAllDealers();
+        model.addAttribute("dealerList", dealerList);
+        model.addAttribute("order", new DTOOrder());
+        return "evmPage/order-create";
+    }
+
+
 }
