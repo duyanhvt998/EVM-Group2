@@ -27,9 +27,6 @@
         <div class="bg-particles" id="particles"></div>
 
         <div class="mainContent">
-            <div class="page-header">
-                <h2>Vehicle Details</h2>
-            </div>
 
             <div class="scroll-box-vehicle-details">
                 <div class="left-column">
@@ -38,76 +35,78 @@
 
                         <div class="info-group">
                             <span class="label">VIN</span>
-                            <span class="value vehicle-id">1HGBH41JXMN109186</span>
+                            <span class="value vehicle-id" th:text="${vehicle.VIN}"></span>
                         </div>
 
                         <div class="info-group">
                             <span class="label">Manufacture Date</span>
-                            <span class="value">January 15, 2024</span>
+                            <span class="value" th:text="${vehicle.manufactureDate}"></span>
                         </div>
 
                         <div class="info-group">
                             <span class="label">Status</span>
-                            <span class="value">Available</span>
+                            <span class="value" th:text="${vehicle.status}"></span>
                         </div>
 
                         <div class="info-group">
                             <span class="label">Color Name</span>
-                            <span class="value">Midnight Blue</span>
+                            <span class="value" th:text="${vehicle.color.colorName}"></span>
                         </div>
 
                         <div class="info-group">
                             <span class="label">Model Name</span>
-                            <span class="value">Accord Sport</span>
+                            <span class="value" th:text="${vehicle.model.modelName}"></span>
                         </div>
 
                         <div class="info-group">
                             <span class="label">Brand</span>
-                            <span class="value">Honda</span>
+                            <span class="value" th:text="${vehicle.model.brand}"></span>
                         </div>
 
                         <div class="info-group">
                             <span class="label">Body Type</span>
-                            <span class="value">Sedan</span>
+                            <span class="value" th:text="${vehicle.model.bodyType}"></span>
                         </div>
 
                         <div class="info-group">
                             <span class="label">Year</span>
-                            <span class="value">2024</span>
+                            <span class="value" th:text="${vehicle.model.year}"></span>
                         </div>
 
                         <div class="info-group">
                             <span class="label">Description</span>
-                            <span class="value">Premium Sport Edition</span>
+                            <span class="value" th:text="${vehicle.model.description}"></span>
                         </div>
 
                         <div class="info-group">
                             <span class="label">Base Price</span>
-                            <span class="value">$32,500</span>
+                            <span class="value" th:text="${vehicle.model.basePrice}"></span>
                         </div>
 
                         <div class="info-group">
                             <span class="label">Version Name</span>
-                            <span class="value">2.0T Sport</span>
+                            <span class="value" th:text="${vehicle.version.versionName}"></span>
                         </div>
 
                         <div class="info-group">
                             <span class="label">Engine</span>
-                            <span class="value">2.0L Turbo I4</span>
+                            <span class="value" th:text="${vehicle.version.engine}"></span>
                         </div>
 
                         <div class="info-group">
                             <span class="label">Transmission</span>
-                            <span class="value">10-Speed Automatic</span>
+                            <span class="value" th:text="${vehicle.version.transmission}"></span>
                         </div>
                     </div>
                 </div>
 
                 <div class="right-column">
                     <div class="image-container">
-                        <img src="https://images.unsplash.com/photo-1619405399517-d7fce0f13302?w=800"
-                             alt="Vehicle Image"
+                        <img th:if="${vehicle.model.modelImage != null}"
+                             th:src="@{/evm/vehicle/showImage/{vin}(vin=${vehicle.VIN})}"
+                             alt="Model Image"
                              class="vehicle-image">
+                        <span th:if="${vehicle.model.modelImage == null}">🚗</span>
                     </div>
 
                     <div class="actions-container">
