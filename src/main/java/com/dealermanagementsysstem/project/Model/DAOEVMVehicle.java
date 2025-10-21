@@ -48,8 +48,8 @@ public class DAOEVMVehicle {
                         rs.getString("Description"),
                         rs.getInt("EvmID"),
                         rs.getDouble("BasePrice"),
-                        rs.getString("ModelImage"),
-                        rs.getInt("MergedToID")
+                        rs.getBytes("ModelImage"), // ✅ FIX: getBytes
+                        rs.getObject("MergedToID", Integer.class)
                 );
 
                 DTOEVMVehicleVersion version = new DTOEVMVehicleVersion(
@@ -123,8 +123,8 @@ public class DAOEVMVehicle {
                             rs.getString("Description"),
                             rs.getInt("EvmID"),
                             rs.getDouble("BasePrice"),
-                            rs.getString("ModelImage"),
-                            rs.getInt("MergedToID")
+                            rs.getBytes("ModelImage"), // ✅ FIX
+                            rs.getObject("MergedToID", Integer.class)
                     );
 
                     DTOEVMVehicleVersion version = new DTOEVMVehicleVersion(
@@ -198,8 +198,8 @@ public class DAOEVMVehicle {
                             rs.getString("Description"),
                             rs.getInt("EvmID"),
                             rs.getDouble("BasePrice"),
-                            rs.getString("ModelImage"),
-                            rs.getInt("MergedToID")
+                            rs.getBytes("ModelImage"), // ✅ FIX
+                            rs.getObject("MergedToID", Integer.class)
                     );
 
                     DTOEVMVehicleVersion version = new DTOEVMVehicleVersion(
@@ -220,7 +220,6 @@ public class DAOEVMVehicle {
                     vehicle.setModel(model);
                     vehicle.setVersion(version);
                     vehicle.setColor(color);
-
                     list.add(vehicle);
                 }
             }
@@ -233,8 +232,8 @@ public class DAOEVMVehicle {
     }
 
     // ======================================================
-// CREATE VEHICLE (FIXED)
-// ======================================================
+    // CREATE VEHICLE (fixed)
+    // ======================================================
     public boolean createVehicle(
             String vin,
             String modelName,
@@ -250,9 +249,10 @@ public class DAOEVMVehicle {
             java.util.Date manufactureDate,
             String status,
             int evmID,
-            byte[] thumbnailBytes // ✅ đổi từ String sang byte[]
+            byte[] thumbnailBytes
     ) {
         boolean success = false;
+
         try (Connection conn = DBUtils.getConnection()) {
             conn.setAutoCommit(false);
 
@@ -260,7 +260,7 @@ public class DAOEVMVehicle {
             int colorID = -1;
             int versionID = -1;
 
-            // 1️⃣ Model
+            // Model
             try (PreparedStatement ps = conn.prepareStatement(
                     "SELECT ModelID FROM EVM_VehicleModel WHERE ModelName = ?")) {
                 ps.setString(1, modelName);
@@ -269,9 +269,9 @@ public class DAOEVMVehicle {
                     modelID = rs.getInt("ModelID");
                 } else {
                     try (PreparedStatement ins = conn.prepareStatement("""
-                    INSERT INTO EVM_VehicleModel (ModelName, Brand, BodyType, Year, Description, EvmID, BasePrice, ModelImage)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """, Statement.RETURN_GENERATED_KEYS)) {
+                        INSERT INTO EVM_VehicleModel (ModelName, Brand, BodyType, Year, Description, EvmID, BasePrice, ModelImage)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    """, Statement.RETURN_GENERATED_KEYS)) {
                         ins.setString(1, modelName);
                         ins.setString(2, brand);
                         ins.setString(3, bodyType);
@@ -279,16 +279,16 @@ public class DAOEVMVehicle {
                         ins.setString(5, description);
                         ins.setInt(6, evmID);
                         ins.setDouble(7, basePrice);
-                        ins.setBytes(8, thumbnailBytes); // ✅ ghi trực tiếp byte[]
-
+                        ins.setBytes(8, thumbnailBytes);
                         ins.executeUpdate();
+
                         ResultSet gen = ins.getGeneratedKeys();
                         if (gen.next()) modelID = gen.getInt(1);
                     }
                 }
             }
 
-            // 2️⃣ Color
+            // Color
             try (PreparedStatement ps = conn.prepareStatement(
                     "SELECT ColorID FROM EVM_VehicleColor WHERE ColorName = ? AND ModelID = ?")) {
                 ps.setString(1, colorName);
@@ -298,9 +298,9 @@ public class DAOEVMVehicle {
                     colorID = rs.getInt("ColorID");
                 } else {
                     try (PreparedStatement ins = conn.prepareStatement("""
-                    INSERT INTO EVM_VehicleColor (ModelID, ColorName)
-                    VALUES (?, ?)
-                """, Statement.RETURN_GENERATED_KEYS)) {
+                        INSERT INTO EVM_VehicleColor (ModelID, ColorName)
+                        VALUES (?, ?)
+                    """, Statement.RETURN_GENERATED_KEYS)) {
                         ins.setInt(1, modelID);
                         ins.setString(2, colorName);
                         ins.executeUpdate();
@@ -310,7 +310,7 @@ public class DAOEVMVehicle {
                 }
             }
 
-            // 3️⃣ Version
+            // Version
             try (PreparedStatement ps = conn.prepareStatement(
                     "SELECT VersionID FROM EVM_VehicleVersion WHERE VersionName = ? AND ModelID = ?")) {
                 ps.setString(1, versionName);
@@ -320,9 +320,9 @@ public class DAOEVMVehicle {
                     versionID = rs.getInt("VersionID");
                 } else {
                     try (PreparedStatement ins = conn.prepareStatement("""
-                    INSERT INTO EVM_VehicleVersion (ModelID, VersionName, Engine, Transmission, Price)
-                    VALUES (?, ?, ?, ?, ?)
-                """, Statement.RETURN_GENERATED_KEYS)) {
+                        INSERT INTO EVM_VehicleVersion (ModelID, VersionName, Engine, Transmission, Price)
+                        VALUES (?, ?, ?, ?, ?)
+                    """, Statement.RETURN_GENERATED_KEYS)) {
                         ins.setInt(1, modelID);
                         ins.setString(2, versionName);
                         ins.setString(3, engine);
@@ -335,11 +335,11 @@ public class DAOEVMVehicle {
                 }
             }
 
-            // 4️⃣ Vehicle
+            // Vehicle
             try (PreparedStatement ps = conn.prepareStatement("""
-            INSERT INTO EVM_Vehicle (VIN, ModelID, VersionID, ColorID, ManufactureDate, Status, EvmID)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """)) {
+                INSERT INTO EVM_Vehicle (VIN, ModelID, VersionID, ColorID, ManufactureDate, Status, EvmID)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """)) {
                 ps.setString(1, vin);
                 ps.setInt(2, modelID);
                 ps.setInt(3, versionID);
@@ -356,8 +356,7 @@ public class DAOEVMVehicle {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return success;
     }
-
-
 }
