@@ -121,6 +121,7 @@ public class EVMVehicleController {
             if (created) {
                 model.addAttribute("success", true);
                 model.addAttribute("message", "✅ Vehicle created successfully!");
+                return "evm/vehicle/list"; // hiển thị kết quả
             } else {
                 model.addAttribute("success", false);
                 model.addAttribute("message", "❌ Failed to create vehicle. Please try again.");
