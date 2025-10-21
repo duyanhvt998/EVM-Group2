@@ -271,9 +271,9 @@ public class DAOEVMVehicle {
                     modelID = rs.getInt("ModelID");
                 } else {
                     try (PreparedStatement ins = conn.prepareStatement("""
-                        INSERT INTO EVM_VehicleModel (ModelName, Brand, BodyType, Year, Description, EvmID, BasePrice, ModelImage)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    """, Statement.RETURN_GENERATED_KEYS)) {
+                    INSERT INTO EVM_VehicleModel (ModelName, Brand, BodyType, Year, Description, EvmID, BasePrice, ModelImage)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, Statement.RETURN_GENERATED_KEYS)) {
                         ins.setString(1, modelName);
                         ins.setString(2, brand);
                         ins.setString(3, bodyType);
@@ -281,7 +281,18 @@ public class DAOEVMVehicle {
                         ins.setString(5, description);
                         ins.setInt(6, evmID);
                         ins.setDouble(7, basePrice);
-                        ins.setString(8, thumbnailPath);
+
+                        // ✅ Đọc file ảnh thành byte[]
+                        byte[] imageBytes = null;
+                        if (thumbnailPath != null && !thumbnailPath.isBlank()) {
+                            try {
+                                imageBytes = java.nio.file.Files.readAllBytes(java.nio.file.Paths.get(thumbnailPath));
+                            } catch (Exception ex) {
+                                System.out.println("[WARN] Cannot read image file: " + thumbnailPath);
+                            }
+                        }
+                        ins.setBytes(8, imageBytes); // set null nếu không có ảnh
+
                         ins.executeUpdate();
                         ResultSet gen = ins.getGeneratedKeys();
                         if (gen.next()) modelID = gen.getInt(1);
@@ -299,9 +310,9 @@ public class DAOEVMVehicle {
                     colorID = rs.getInt("ColorID");
                 } else {
                     try (PreparedStatement ins = conn.prepareStatement("""
-                        INSERT INTO EVM_VehicleColor (ModelID, ColorName)
-                        VALUES (?, ?)
-                    """, Statement.RETURN_GENERATED_KEYS)) {
+                    INSERT INTO EVM_VehicleColor (ModelID, ColorName)
+                    VALUES (?, ?)
+                """, Statement.RETURN_GENERATED_KEYS)) {
                         ins.setInt(1, modelID);
                         ins.setString(2, colorName);
                         ins.executeUpdate();
@@ -321,9 +332,9 @@ public class DAOEVMVehicle {
                     versionID = rs.getInt("VersionID");
                 } else {
                     try (PreparedStatement ins = conn.prepareStatement("""
-                        INSERT INTO EVM_VehicleVersion (ModelID, VersionName, Engine, Transmission, Price)
-                        VALUES (?, ?, ?, ?, ?)
-                    """, Statement.RETURN_GENERATED_KEYS)) {
+                    INSERT INTO EVM_VehicleVersion (ModelID, VersionName, Engine, Transmission, Price)
+                    VALUES (?, ?, ?, ?, ?)
+                """, Statement.RETURN_GENERATED_KEYS)) {
                         ins.setInt(1, modelID);
                         ins.setString(2, versionName);
                         ins.setString(3, engine);
@@ -338,9 +349,9 @@ public class DAOEVMVehicle {
 
             // 4️⃣ Vehicle
             try (PreparedStatement ps = conn.prepareStatement("""
-                INSERT INTO EVM_Vehicle (VIN, ModelID, VersionID, ColorID, ManufactureDate, Status, EvmID)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            """)) {
+            INSERT INTO EVM_Vehicle (VIN, ModelID, VersionID, ColorID, ManufactureDate, Status, EvmID)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """)) {
                 ps.setString(1, vin);
                 ps.setInt(2, modelID);
                 ps.setInt(3, versionID);
@@ -360,4 +371,5 @@ public class DAOEVMVehicle {
         }
         return success;
     }
+
 }
