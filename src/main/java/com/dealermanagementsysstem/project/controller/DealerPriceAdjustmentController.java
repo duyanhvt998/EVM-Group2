@@ -1,10 +1,11 @@
 package com.dealermanagementsysstem.project.controller;
 
 import com.dealermanagementsysstem.project.Model.DAODealerPriceAdjustment;
+import com.dealermanagementsysstem.project.Model.DAOAccount;
 import com.dealermanagementsysstem.project.Model.DTODealerPriceAdjustment;
-import com.dealermanagementsysstem.project.Model.DTOAccount;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -16,41 +17,40 @@ import java.util.List;
 @RequestMapping("/discount")
 public class DealerPriceAdjustmentController {
 
-    private final DAODealerPriceAdjustment dao;
+    private final DAODealerPriceAdjustment daoDiscount;
+    private final DAOAccount daoAccount;
 
     public DealerPriceAdjustmentController() {
-        this.dao = new DAODealerPriceAdjustment();
+        this.daoDiscount = new DAODealerPriceAdjustment();
+        this.daoAccount = new DAOAccount();
     }
 
     // ✅ Trang quản lý Discount (list + form + search)
     @GetMapping
     public String showDiscountManagementPage(
             @RequestParam(value = "keyword", required = false) String keyword,
-            Model model,
-            HttpSession session
+            Model model
     ) {
-        // ✅ Lấy account đang đăng nhập từ session
-        DTOAccount acc = (DTOAccount) session.getAttribute("loggedInAccount");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName(); // ✅ Lấy email đang đăng nhập
+        Integer dealerID = daoAccount.getDealerIdByEmail(email);
 
-        if (acc == null || acc.getDealerId() == null) {
-            model.addAttribute("error", "Không tìm thấy Dealer đang đăng nhập!");
-            return "dealerPage/DealerHomePage";
+        if (dealerID == null) {
+            model.addAttribute("error", "Không tìm thấy Dealer của email: " + email);
+            return "dealerPage/discountManagement";
         }
 
-        int dealerID = acc.getDealerId();
         List<DTODealerPriceAdjustment> discounts;
-
-        // ✅ Nếu có keyword → tìm theo tên khuyến mãi
         if (keyword != null && !keyword.trim().isEmpty()) {
-            discounts = dao.searchByPromotionNameAndDealer(keyword, dealerID);
+            discounts = daoDiscount.searchByPromotionNameAndDealer(keyword, dealerID);
             model.addAttribute("keyword", keyword);
         } else {
-            discounts = dao.getDiscountsByDealer(dealerID);
+            discounts = daoDiscount.getDiscountsByDealer(dealerID);
         }
 
         model.addAttribute("discounts", discounts);
         model.addAttribute("discount", new DTODealerPriceAdjustment());
-        return "dealerPage/createADealerDiscount";
+        return "dealerPage/discountManagement";
     }
 
     // ✅ Tạo discount mới (POST)
@@ -62,14 +62,14 @@ public class DealerPriceAdjustmentController {
             @RequestParam("discountPercent") Double discountPercent,
             @RequestParam("modelID") int modelID,
             @RequestParam(value = "notes", required = false) String notes,
-            Model model,
-            HttpSession session
+            Model model
     ) {
-        // ✅ Lấy account đang login
-        DTOAccount acc = (DTOAccount) session.getAttribute("loggedInAccount");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName(); // ✅ Lấy email đang đăng nhập
+        Integer dealerID = daoAccount.getDealerIdByEmail(email);
 
-        if (acc == null || acc.getDealerId() == null) {
-            model.addAttribute("error", "Không tìm thấy Dealer đang đăng nhập!");
+        if (dealerID == null) {
+            model.addAttribute("error", "Không tìm thấy Dealer của email: " + email);
             return "dealerPage/discountManagement";
         }
 
@@ -80,23 +80,21 @@ public class DealerPriceAdjustmentController {
         d.setDiscountPercent(discountPercent);
         d.setModelID(modelID);
         d.setNotes(notes);
-        d.setDealerID(acc.getDealerId()); // ✅ Gắn dealerID từ session
+        d.setDealerID(dealerID);
         d.setDiscountAmount(0.0);
 
-        boolean success = dao.createDiscount(d);
+        boolean success = daoDiscount.createDiscount(d);
 
         if (success) {
-            System.out.println("✅ [SUCCESS] Discount created: " + promotionName + " by dealerID=" + acc.getDealerId());
             model.addAttribute("message", "Tạo discount thành công!");
         } else {
-            System.out.println("❌ [FAILED] Failed to create discount: " + promotionName);
             model.addAttribute("error", "Không thể tạo discount. Vui lòng kiểm tra dữ liệu!");
         }
 
-        // ✅ Load lại danh sách theo dealer đang login
-        List<DTODealerPriceAdjustment> discounts = dao.getDiscountsByDealer(acc.getDealerId());
+        // ✅ Load lại danh sách discount của dealer đó
+        List<DTODealerPriceAdjustment> discounts = daoDiscount.getDiscountsByDealer(dealerID);
         model.addAttribute("discounts", discounts);
         model.addAttribute("discount", new DTODealerPriceAdjustment());
-        return "dealerPage/createADealerDiscount";
+        return "dealerPage/discountManagement";
     }
 }
