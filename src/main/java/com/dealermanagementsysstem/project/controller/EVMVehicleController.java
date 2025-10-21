@@ -42,9 +42,6 @@ public class EVMVehicleController {
     }
 
 
-
-
-
     // ===========================
     // 2️⃣ Chi tiết xe theo VIN
     // ===========================
@@ -65,6 +62,23 @@ public class EVMVehicleController {
     @GetMapping("/create")
     public String showCreateForm() {
         return "evmPage/createANewVehicleToList";
+    }
+
+    // ===========================
+// ✅ Trả ảnh model theo VIN
+// ===========================
+    @GetMapping("/showImage/{vin}")
+    @ResponseBody
+    public ResponseEntity<byte[]> showVehicleImage(@PathVariable("vin") String vin) {
+        DTOEVMVehicle vehicle = dao.getVehicleByVIN(vin);
+        if (vehicle == null || vehicle.getModel() == null || vehicle.getModel().getModelImage() == null) {
+            return ResponseEntity.notFound().build();
+        }
+        byte[] imageBytes = vehicle.getModel().getModelImage();
+        return ResponseEntity
+                .ok()
+                .header("Content-Type", "image/jpeg")
+                .body(imageBytes);
     }
 
     // ===========================
