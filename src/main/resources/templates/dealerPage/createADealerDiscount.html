@@ -89,25 +89,27 @@
                     <div class="discount-grid">
 
                         <!-- Discount Card Template - Copy and paste this block for each discount -->
-                        <a href="/dealerShowDiscountDetailTest" style="text-decoration: none;">
-                            <div class="discount-card">
-                                <div class="discount-name">Christmas Discount</div>
-                                <div class="discount-info">
-                                    <div class="info-row">
-                                        <span class="info-label">Discount</span>
-                                        <span class="percent-badge">20%</span>
-                                    </div>
-                                    <div class="info-row">
-                                        <span class="info-label">Start Date</span>
-                                        <span class="date-value">2025-12-01</span>
-                                    </div>
-                                    <div class="info-row">
-                                        <span class="info-label">End Date</span>
-                                        <span class="date-value">2025-12-25</span>
+                        <div th:each="discount : ${discounts}">
+                            <a href="/dealerShowDiscountDetailTest" style="text-decoration: none;">
+                                <div class="discount-card">
+                                    <div class="discount-name">Christmas Discount</div>
+                                    <div class="discount-info">
+                                        <div class="info-row">
+                                            <span class="info-label">Discount</span>
+                                            <span class="percent-badge" th:text="${discount.promotionName}"></span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label">Start Date</span>
+                                            <span class="date-value" th:text="${discount.startDate}"></span>
+                                        </div>
+                                        <div class="info-row">
+                                            <span class="info-label">End Date</span>
+                                            <span class="date-value" th:text="${discount.endDate}"></span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </a>
+                            </a>
+                        </div>
 
                     </div>
                 </div>

@@ -34,7 +34,7 @@ public class DealerPriceAdjustmentController {
 
         if (acc == null || acc.getDealerId() == null) {
             model.addAttribute("error", "Không tìm thấy Dealer đang đăng nhập!");
-            return "dealerPage/discountManagement";
+            return "dealerPage/DealerHomePage";
         }
 
         int dealerID = acc.getDealerId();
@@ -50,7 +50,7 @@ public class DealerPriceAdjustmentController {
 
         model.addAttribute("discounts", discounts);
         model.addAttribute("discount", new DTODealerPriceAdjustment());
-        return "dealerPage/discountManagement";
+        return "dealerPage/createADealerDiscount";
     }
 
     // ✅ Tạo discount mới (POST)
@@ -97,6 +97,6 @@ public class DealerPriceAdjustmentController {
         List<DTODealerPriceAdjustment> discounts = dao.getDiscountsByDealer(acc.getDealerId());
         model.addAttribute("discounts", discounts);
         model.addAttribute("discount", new DTODealerPriceAdjustment());
-        return "dealerPage/discountManagement";
+        return "dealerPage/createADealerDiscount";
     }
 }
