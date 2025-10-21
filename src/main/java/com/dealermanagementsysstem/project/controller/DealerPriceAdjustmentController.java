@@ -37,7 +37,7 @@ public class DealerPriceAdjustmentController {
 
         if (dealerID == null) {
             model.addAttribute("error", "Không tìm thấy Dealer của email: " + email);
-            return "dealerPage/discountManagement";
+            return "dealerPage/createADealerDiscount";
         }
 
         List<DTODealerPriceAdjustment> discounts;
@@ -50,7 +50,7 @@ public class DealerPriceAdjustmentController {
 
         model.addAttribute("discounts", discounts);
         model.addAttribute("discount", new DTODealerPriceAdjustment());
-        return "dealerPage/discountManagement";
+        return "dealerPage/createADealerDiscount";
     }
 
     // ✅ Tạo discount mới (POST)
@@ -70,7 +70,7 @@ public class DealerPriceAdjustmentController {
 
         if (dealerID == null) {
             model.addAttribute("error", "Không tìm thấy Dealer của email: " + email);
-            return "dealerPage/discountManagement";
+            return "dealerPage/createADealerDiscount";
         }
 
         DTODealerPriceAdjustment d = new DTODealerPriceAdjustment();
@@ -95,6 +95,6 @@ public class DealerPriceAdjustmentController {
         List<DTODealerPriceAdjustment> discounts = daoDiscount.getDiscountsByDealer(dealerID);
         model.addAttribute("discounts", discounts);
         model.addAttribute("discount", new DTODealerPriceAdjustment());
-        return "dealerPage/discountManagement";
+        return "dealerPage/createADealerDiscount";
     }
 }
