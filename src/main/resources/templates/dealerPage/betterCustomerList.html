@@ -33,26 +33,18 @@
         <div class="d-flex">
 
             <span>
-                <h1>Vehicle List</h1>
+                <h1>Customer List</h1>
             </span>
 
-            <form action="/searchVehicleListController" method="get">
+            <form action="/customer/search" method="get">
                 <input name="keyword"
                        type="text"
                        class="search-vehicle-list-input-control search-vehicle-list-input mb-1"
-                       placeholder="Search by model name"
+                       placeholder="Search by customer name or email"
                        th:value="${keyword}"
                         style="margin-top: 12px;">
                 <button type="submit" class="btn btn-dark rounded-pill">Search</button>
             </form>
-
-            <a href="/evmCreateANewVehicleToList" style="text-decoration: none">
-                <button class="createNewVehicleButton">
-                    <span>
-                        Create new vehicle
-                    </span>
-                </button>
-            </a>
 
         </div>
 
@@ -62,37 +54,33 @@
                 <div class="items-container">
 
                     <!-- Item -->
-                    <div th:each="vehicle : ${vehicles}">
+                    <div th:each="customer : ${customers}">
 
-                        <a href="" style="text-decoration: none;" th:href="@{/evm/vehicle/detail/{vin}(vin=${vehicle.VIN})}">
+                        <a th:href="@{/customer/edit/{id}(id=${customer.customerID})}" style="text-decoration: none;">
                             <button class="item-button" >
                                 <div class="image-placeholder">
-                                    <img th:if="${vehicle.model.modelImage != null}"
-                                         th:src="@{/evm/vehicle/showImage/{vin}(vin=${vehicle.VIN})}"
-                                         alt="Model Image"
-                                         class="vehicle-image">
-                                    <span th:if="${vehicle.model.modelImage == null}">🚗</span>
+                                    <i class="fa-solid fa-user"></i>
                                 </div>
                                 <div class="item-info">
-                                    <div class="model-name"> Model name: <span th:text="${vehicle.model.modelName}"></span> </div>
+                                    <div class="model-name"> <span th:text="${customer.fullName}"></span> </div>
                                     <div class="info-row">
                                         <div class="info-item">
-                                            <span class="info-label">Brand:</span>
-                                            <span class="info-value"><span th:text="${vehicle.model.brand}"></span></span>
+                                            <span class="info-label">Email:</span>
+                                            <span class="info-value"><span th:text="${customer.email}"></span></span>
                                         </div>
                                         <div class="info-item">
-                                            <span class="info-label">Year:</span>
-                                            <span class="info-value"><span th:text="${vehicle.model.year}"></span></span>
+                                            <span class="info-label">Phone number:</span>
+                                            <span class="info-value"><span th:text="${customer.phone}"></span></span>
                                         </div>
                                     </div>
                                     <div class="info-row">
                                         <div class="info-item">
-                                            <span class="info-label">Version:</span>
-                                            <span class="info-value"><span th:text="${vehicle.version.versionName}"></span></span>
+                                            <span class="info-label">Birth date:</span>
+                                            <span class="info-value"><span th:text="${customer.birthDate}"></span></span>
                                         </div>
                                         <div class="info-item">
-                                            <span class="info-label">Engine:</span>
-                                            <span class="info-value"><span th:text="${vehicle.version.engine}"></span></span>
+                                            <span class="info-label">Created at:</span>
+                                            <span class="info-value"><span th:text="${customer.createdAt}"></span></span>
                                         </div>
                                     </div>
                                 </div>

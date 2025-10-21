@@ -28,7 +28,7 @@ public class CustomerController {
     public String listCustomers(Model model) {
         List<DTOCustomer> list = dao.getAllCustomers();
         model.addAttribute("customers", list);
-        return "dealerPage/customerList";
+        return "dealerPage/betterCustomerList";
     }
 
     // ✅ Hiển thị form thêm mới khách hàng
@@ -44,7 +44,7 @@ public class CustomerController {
         List<DTOCustomer> list = dao.searchCustomer(keyword);
         model.addAttribute("customers", list);
         model.addAttribute("keyword", keyword);
-        return "dealerPage/customerManagement";
+        return "dealerPage/betterCustomerList";
     }
 
     // ✅ Thêm mới khách hàng (dùng RequestParam)
