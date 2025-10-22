@@ -1,6 +1,7 @@
 package com.dealermanagementsysstem.project.Model;
 
 import java.time.LocalDate;
+import java.util.Date;
 
 public class DTODiscountPolicy {
     private int policyID;
@@ -12,15 +13,14 @@ public class DTODiscountPolicy {
     private LocalDate startDate;
     private LocalDate endDate;
     private String status; // Active / Expired
-
+    private Date creationDate;
+    private int levelID;
     // Thêm thuộc tính tùy chọn dùng khi liên kết đơn hàng
     private int appliedOrderDetailID; // nếu có áp dụng vào SaleOrderDetail
 
     public DTODiscountPolicy() {}
 
-    public DTODiscountPolicy(int policyID, int dealerID, String policyName, String description,
-                             double hangPercent, double dailyPercent,
-                             LocalDate startDate, LocalDate endDate, String status) {
+    public DTODiscountPolicy(int policyID, int dealerID, String policyName, String description, double hangPercent, double dailyPercent, LocalDate startDate, LocalDate endDate, String status, Date creationDate, int levelID, int appliedOrderDetailID) {
         this.policyID = policyID;
         this.dealerID = dealerID;
         this.policyName = policyName;
@@ -30,6 +30,25 @@ public class DTODiscountPolicy {
         this.startDate = startDate;
         this.endDate = endDate;
         this.status = status;
+        this.creationDate = creationDate;
+        this.levelID = levelID;
+        this.appliedOrderDetailID = appliedOrderDetailID;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public int getLevelID() {
+        return levelID;
+    }
+
+    public void setLevelID(int levelID) {
+        this.levelID = levelID;
     }
 
     // Getters / Setters
