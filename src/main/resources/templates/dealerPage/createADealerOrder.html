@@ -40,6 +40,7 @@
         <div class="d-flex create-vehicle-form-container">
 
             <form action="/customer/insert" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <div class="create-vehicle-form-row">
                     <label>Full name</label>
                     <input name="FullName" type="text" class="create-vehicle-form-input mb-1" required>

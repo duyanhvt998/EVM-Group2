@@ -1,12 +1,13 @@
 package com.dealermanagementsysstem.project.controller;
 
 import com.dealermanagementsysstem.project.Model.DAOPurchaseOrder;
+import com.dealermanagementsysstem.project.Model.DAOPurchaseOrderDetail;
 import com.dealermanagementsysstem.project.Model.DTOPurchaseOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -18,60 +19,125 @@ public class PurchaseOrderController {
     @Autowired
     private DAOPurchaseOrder daoPurchaseOrder;
 
-    // 🔹 Hiển thị danh sách đơn hàng (HTML)
+    @Autowired
+    private DAOPurchaseOrderDetail daoPurchaseOrderDetail;
+
+    /**
+     * 🔹 Trang danh sách đơn hàng
+     */
     @GetMapping("")
     public String showOrderList(Model model) {
         List<DTOPurchaseOrder> orders = daoPurchaseOrder.getAllPurchaseOrders();
         model.addAttribute("orders", orders);
-        return "dealerPage/orderStatusList"; //
+        return "dealerPage/orderStatusList";
     }
 
-
-    // 🔹 Hiển thị form tạo đơn hàng
+    /**
+     * 🔹 Khi chọn xe → mở form nhập chi tiết đơn hàng
+     */
     @GetMapping("/create")
-    public String showCreateForm(Model model) {
+    public String showCreateForm(
+            @RequestParam(required = false) Integer modelId,
+            @RequestParam(required = false) Integer colorId,
+            @RequestParam(required = false) String modelName,
+            Model model) {
+
+        model.addAttribute("modelId", modelId);
+        model.addAttribute("colorId", colorId);
+        model.addAttribute("modelName", modelName);
         model.addAttribute("order", new DTOPurchaseOrder());
-        return "dealerPage/createADealerOrder"; // file HTML tạo đơn
+        return "dealerPage/createDealerOrderForm"; // form nhập số lượng + version
     }
 
-    // 🔹 Xử lý form POST tạo đơn hàng
+    /**
+     * 🔹 Xử lý form tạo đơn hàng
+     */
     @PostMapping("/create")
     public String createOrder(
-            @RequestParam(required = false) Integer dealerId,
-            @RequestParam(required = false) Integer staffId,
+            @RequestParam Integer modelId,
+            @RequestParam Integer colorId,
+            @RequestParam Integer quantity,
+            @RequestParam String version,
             @RequestParam(required = false) String status,
             Model model) {
 
-        DTOPurchaseOrder order = new DTOPurchaseOrder();
-        order.setDealerId(dealerId != null ? dealerId : 9);
-        order.setStaffId(staffId != null ? staffId : 11);
-        order.setStatus(status != null ? status : "Pending");
-        order.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        try {
+            // Lấy email người đang đăng nhập (Spring Security)
+            org.springframework.security.core.Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            org.springframework.security.core.userdetails.User user =
+                    (org.springframework.security.core.userdetails.User) auth.getPrincipal();
+            String email = user.getUsername();
 
-        daoPurchaseOrder.insertPurchaseOrder(order);
+            // Lấy DealerID & StaffID dựa theo email đăng nhập
+            int dealerId = daoPurchaseOrder.getDealerIdByEmail(email);
+            int staffId = daoPurchaseOrder.getStaffIdByEmail(email);
 
-        // gửi thông báo sang trang success
-        model.addAttribute("message", "The order has been created successfully!");
+            if (dealerId <= 0 || staffId <= 0) {
+                model.addAttribute("message", "❌ Không tìm thấy Dealer hoặc Staff tương ứng với tài khoản đăng nhập (" + email + ")");
+                return "dealerPage/success";
+            }
+
+            //Tạo đơn hàng mới
+            DTOPurchaseOrder order = new DTOPurchaseOrder();
+            order.setDealerId(dealerId);
+            order.setStaffId(staffId);
+            order.setStatus(status != null ? status : "Pending");
+            order.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+
+            // ✅ Ghi vào DB
+            int newOrderId = daoPurchaseOrder.insertPurchaseOrder(order);
+
+            if (newOrderId > 0) {
+                boolean added = daoPurchaseOrderDetail.insertOrderDetail(
+                        newOrderId, modelId, colorId, quantity, version
+                );
+                model.addAttribute("message", added
+                        ? " Đặt xe thành công!"
+                        : "⚠Đơn đã tạo nhưng chưa ghi chi tiết!");
+            } else {
+                model.addAttribute("message", " Không thể tạo đơn hàng!");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("message", " Lỗi hệ thống: " + e.getMessage());
+        }
+
         return "dealerPage/success";
     }
 
+    /**
+     * 🔹 Trang success (chỉ khi load trực tiếp)
+     */
+    @GetMapping("/success")
+    public String showSuccessPage(Model model) {
+        if (!model.containsAttribute("message")) {
+            model.addAttribute("message", " Order processed!");
+        }
+        return "dealerPage/success";
+    }
 
-
-    // 🔹 Lấy danh sách đơn hàng (JSON)
+    /**
+     * 🔹 API: Lấy danh sách đơn hàng (JSON)
+     */
     @ResponseBody
     @GetMapping("/api")
     public List<DTOPurchaseOrder> getAllOrders() {
         return daoPurchaseOrder.getAllPurchaseOrders();
     }
 
-    // 🔹 Lấy đơn hàng theo ID (JSON)
+    /**
+     * 🔹 API: Lấy đơn hàng theo ID (JSON)
+     */
     @ResponseBody
     @GetMapping("/api/{id}")
     public DTOPurchaseOrder getOrderById(@PathVariable int id) {
         return daoPurchaseOrder.getPurchaseOrderById(id);
     }
 
-    // 🔹 Cập nhật trạng thái đơn hàng
+    /**
+     * 🔹 API: Cập nhật trạng thái đơn hàng
+     */
     @ResponseBody
     @PutMapping("/api/{id}/status")
     public String updateStatus(@PathVariable int id, @RequestParam String status) {
@@ -79,7 +145,9 @@ public class PurchaseOrderController {
         return updated ? "Updated successfully" : "Update failed";
     }
 
-    // 🔹 Xóa đơn hàng
+    /**
+     * 🔹 API: Xóa đơn hàng
+     */
     @ResponseBody
     @DeleteMapping("/api/{id}")
     public String deleteOrder(@PathVariable int id) {
