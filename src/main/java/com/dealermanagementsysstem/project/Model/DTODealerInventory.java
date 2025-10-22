@@ -1,6 +1,5 @@
 package com.dealermanagementsysstem.project.Model;
 
-import java.time.LocalDate;
 import java.util.Date;
 
 public class DTODealerInventory {
@@ -8,19 +7,18 @@ public class DTODealerInventory {
     private String vin;
     private Date receivedDate;
     private String status;
+    private double amount; // 💰 mới thêm
 
-    // ✅ Constructor mặc định
     public DTODealerInventory() {}
 
-    // ✅ Constructor đầy đủ
-    public DTODealerInventory(int dealerId, String vin, Date receivedDate, String status) {
+    public DTODealerInventory(int dealerId, String vin, Date receivedDate, String status, double amount) {
         this.dealerId = dealerId;
         this.vin = vin;
         this.receivedDate = receivedDate;
         this.status = status;
+        this.amount = amount;
     }
 
-    // ✅ Getters & Setters
     public int getDealerId() {
         return dealerId;
     }
@@ -51,5 +49,13 @@ public class DTODealerInventory {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
     }
 }

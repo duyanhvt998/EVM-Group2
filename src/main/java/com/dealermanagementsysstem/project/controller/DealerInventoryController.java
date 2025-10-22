@@ -28,19 +28,19 @@ public class DealerInventoryController {
     @GetMapping
     public String showDealerInventory(Model model) {
         try {
-            // 🔹 Lấy email từ tài khoản đăng nhập
+            // 🔹 Lấy email của người đang đăng nhập
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String email = auth.getName();
 
-            // 🔹 Lấy DealerID theo email
+            // 🔹 Lấy DealerID dựa theo email
             Integer dealerID = daoAccount.getDealerIdByEmail(email);
 
             if (dealerID == null) {
                 model.addAttribute("error", "Không tìm thấy Dealer ID cho tài khoản hiện tại!");
-                return "dealerPage/dealerInventory"; // ⚙️ Trang HTML hiển thị lỗi
+                return "dealerPage/dealerInventory";
             }
 
-            // 🔹 Lấy danh sách xe theo DealerID
+            // 🔹 Lấy danh sách xe
             List<DTODealerInventory> vehicles = daoInventory.getVehiclesByDealerID(dealerID);
 
             model.addAttribute("vehicles", vehicles);
@@ -51,6 +51,6 @@ public class DealerInventoryController {
             model.addAttribute("error", "Đã xảy ra lỗi khi tải danh sách xe!");
         }
 
-        return "dealerPage/dealerInventory"; // ⚙️ View hiển thị danh sách
+        return "dealerPage/dealerInventory";
     }
 }

@@ -7,9 +7,10 @@ import java.util.List;
 
 public class DAODealerInventory {
 
+    // ✅ Lấy danh sách xe theo DealerID
     public List<DTODealerInventory> getVehiclesByDealerID(int dealerID) {
         List<DTODealerInventory> list = new ArrayList<>();
-        String sql = "SELECT DealerID, VIN, ReceivedDate, Status FROM DealerInventory WHERE DealerID = ?";
+        String sql = "SELECT DealerID, VIN, ReceivedDate, Status, Amount FROM DealerInventory WHERE DealerID = ?";
 
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -22,7 +23,8 @@ public class DAODealerInventory {
                         rs.getInt("DealerID"),
                         rs.getString("VIN"),
                         rs.getDate("ReceivedDate"),
-                        rs.getString("Status")
+                        rs.getString("Status"),
+                        rs.getDouble("Amount") // 💰 thêm lấy Amount
                 );
                 list.add(dto);
             }
