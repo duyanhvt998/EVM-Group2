@@ -21,19 +21,18 @@ public class DAODiscountPolicy {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null; // nếu không có
+        return null;
     }
 
     // ✅ Tạo Discount Policy mới
     public boolean createDiscountPolicy(DTODiscountPolicy dto) {
         String sql = "INSERT INTO DiscountPolicy " +
-                "(DealerID, PolicyName, Description, StartDate, EndDate, HangPercent, DailyPercent, Status, CreationDate, LevelID) " +
+                "(DealerID, PolicyName, Description, StartDate, EndDate, HangPercent, DailyPercent, Status, CreatedAt, LevelID) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, GETDATE(), ?)";
 
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            // 🔹 Lấy LevelID dựa theo DealerID
             Integer levelID = getLevelIdByDealerId(dto.getDealerID());
             if (levelID == null) {
                 System.out.println("⚠️ Không tìm thấy LevelID cho DealerID: " + dto.getDealerID());
@@ -53,20 +52,20 @@ public class DAODiscountPolicy {
             return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
+            System.out.println("❌ Lỗi khi thêm Discount Policy: " + e.getMessage());
             e.printStackTrace();
         }
         return false;
     }
 
-    // ✅ Lấy danh sách policy theo DealerID
-    public List<DTODiscountPolicy> getPoliciesByDealer(int dealerID) {
+    // ✅ Lấy tất cả policy (không cần DealerID)
+    public List<DTODiscountPolicy> getAllPolicies() {
         List<DTODiscountPolicy> list = new ArrayList<>();
-        String sql = "SELECT * FROM DiscountPolicy WHERE DealerID = ? ORDER BY StartDate DESC";
+        String sql = "SELECT * FROM DiscountPolicy ORDER BY CreatedAt DESC";
 
         try (Connection conn = DBUtils.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, dealerID);
-            ResultSet rs = ps.executeQuery();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 DTODiscountPolicy dto = new DTODiscountPolicy();
@@ -79,7 +78,7 @@ public class DAODiscountPolicy {
                 dto.setHangPercent(rs.getDouble("HangPercent"));
                 dto.setDailyPercent(rs.getDouble("DailyPercent"));
                 dto.setStatus(rs.getString("Status"));
-                dto.setCreationDate(rs.getDate("CreationDate"));
+                dto.setCreationDate(rs.getDate("CreatedAt")); // ✅ đúng tên cột
                 dto.setLevelID(rs.getInt("LevelID"));
                 list.add(dto);
             }
@@ -90,18 +89,17 @@ public class DAODiscountPolicy {
         return list;
     }
 
-    // ✅ Search theo tên policy và DealerID
-    public List<DTODiscountPolicy> searchPolicyByName(String name, int dealerID) {
+    // ✅ Search theo tên Policy
+    public List<DTODiscountPolicy> searchPolicyByName(String keyword) {
         List<DTODiscountPolicy> list = new ArrayList<>();
-        String sql = "SELECT * FROM DiscountPolicy WHERE DealerID = ? AND PolicyName LIKE ?";
+        String sql = "SELECT * FROM DiscountPolicy WHERE PolicyName LIKE ? ORDER BY CreatedAt DESC";
 
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, dealerID);
-            ps.setString(2, "%" + name + "%");
-
+            ps.setString(1, "%" + keyword + "%");
             ResultSet rs = ps.executeQuery();
+
             while (rs.next()) {
                 DTODiscountPolicy dto = new DTODiscountPolicy();
                 dto.setPolicyID(rs.getInt("PolicyID"));
@@ -113,7 +111,7 @@ public class DAODiscountPolicy {
                 dto.setHangPercent(rs.getDouble("HangPercent"));
                 dto.setDailyPercent(rs.getDouble("DailyPercent"));
                 dto.setStatus(rs.getString("Status"));
-                dto.setCreationDate(rs.getDate("CreationDate"));
+                dto.setCreationDate(rs.getDate("CreatedAt"));
                 dto.setLevelID(rs.getInt("LevelID"));
                 list.add(dto);
             }

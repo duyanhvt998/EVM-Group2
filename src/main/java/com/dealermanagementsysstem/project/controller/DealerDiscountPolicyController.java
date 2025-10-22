@@ -1,11 +1,8 @@
 package com.dealermanagementsysstem.project.controller;
 
-import com.dealermanagementsysstem.project.Model.DAOAccount;
 import com.dealermanagementsysstem.project.Model.DAODiscountPolicy;
 import com.dealermanagementsysstem.project.Model.DTODiscountPolicy;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -17,70 +14,43 @@ import java.util.List;
 @RequestMapping("/discount-policy")
 public class DealerDiscountPolicyController {
 
-    private final DAODiscountPolicy daoPolicy;
-    private final DAOAccount daoAccount;
+    private final DAODiscountPolicy daoPolicy = new DAODiscountPolicy();
 
-    public DealerDiscountPolicyController() {
-        this.daoPolicy = new DAODiscountPolicy();
-        this.daoAccount = new DAOAccount();
-    }
-
-    // ✅ [GET] Trang hiển thị danh sách + form + search
+    // ✅ Trang hiển thị list + search + form
     @GetMapping
     public String showDiscountPolicyPage(
             @RequestParam(value = "keyword", required = false) String keyword,
             Model model
     ) {
-        // 🔹 Lấy email đăng nhập từ Spring Security
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        Integer dealerID = daoAccount.getDealerIdByEmail(email);
-
-        if (dealerID == null) {
-            model.addAttribute("error", "Không tìm thấy Dealer của email: " + email);
-            return "evmPage/homePage";
-        }
-
         List<DTODiscountPolicy> policies;
 
         if (keyword != null && !keyword.trim().isEmpty()) {
-            policies = daoPolicy.searchPolicyByName(keyword, dealerID);
+            policies = daoPolicy.searchPolicyByName(keyword);
             model.addAttribute("keyword", keyword);
         } else {
-            policies = daoPolicy.getPoliciesByDealer(dealerID);
+            policies = daoPolicy.getAllPolicies();
         }
 
-        System.out.println("DEALER ID: " + dealerID);
         model.addAttribute("policies", policies);
         model.addAttribute("newPolicy", new DTODiscountPolicy());
-        return "evmPage/evmDiscountPolicyManagement"; // ✅ trỏ về đúng HTML trang
+        return "evmPage/evmDiscountPolicyManagement"; // ⚙️ file HTML
     }
 
-    // ✅ [POST] Tạo Discount Policy mới
-    @PostMapping("/insert")
-    public String insertDiscountPolicy(
+    // ✅ Tạo mới Discount Policy
+    @PostMapping("/create")
+    public String createDiscountPolicy(
             @RequestParam("policyName") String policyName,
             @RequestParam("description") String description,
             @RequestParam("hangPercent") double hangPercent,
             @RequestParam("dailyPercent") double dailyPercent,
             @RequestParam("status") String status,
+            @RequestParam("dealerId") int dealerId,
             @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             Model model
     ) {
-        // 🔹 Lấy DealerID từ email đăng nhập
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        Integer dealerID = daoAccount.getDealerIdByEmail(email);
-
-        if (dealerID == null) {
-            model.addAttribute("error", "Không tìm thấy Dealer của email: " + email);
-            return "evmPage/homePage";
-        }
-
-        // 🔹 Tạo object DTO
         DTODiscountPolicy dto = new DTODiscountPolicy();
-        dto.setDealerID(dealerID);
+        dto.setDealerID(dealerId);
         dto.setPolicyName(policyName);
         dto.setDescription(description);
         dto.setHangPercent(hangPercent);
@@ -89,19 +59,16 @@ public class DealerDiscountPolicyController {
         dto.setStartDate(startDate);
         dto.setEndDate(endDate);
 
-        // 🔹 Gọi DAO để thêm mới
         boolean success = daoPolicy.createDiscountPolicy(dto);
 
         if (success) {
-            model.addAttribute("message", "Tạo Discount Policy thành công!");
+            model.addAttribute("message", "✅ Created Discount Policy successfully!");
         } else {
-            model.addAttribute("error", "Không thể tạo Discount Policy. Kiểm tra lại dữ liệu!");
+            model.addAttribute("error", "❌ Failed to create Discount Policy. Check data or Dealer ID!");
         }
 
-        // 🔹 Reload lại danh sách policy sau khi thêm
-        List<DTODiscountPolicy> policies = daoPolicy.getPoliciesByDealer(dealerID);
+        List<DTODiscountPolicy> policies = daoPolicy.getAllPolicies();
         model.addAttribute("policies", policies);
-        model.addAttribute("newPolicy", new DTODiscountPolicy());
         return "evmPage/evmDiscountPolicyManagement";
     }
 }
