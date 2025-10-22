@@ -28,17 +28,11 @@ public class DiscountPolicyController {
     public String listPolicies(Model model) throws SQLException {
         List<DTODiscountPolicy> policies = dao.getAllPolicies();
         model.addAttribute("policies", policies);
-        return "templates/evmPage/discountPolicyList"; // bỏ .html vì Thymeleaf tự hiểu
-    }
-
-    // 🟢 [GET] /discount-policy/create
-    @GetMapping("/create")
-    public String showCreateForm() {
-        return "templates/evmPage/createDiscountPolicy";
+        return "evmPage/evmDiscountPolicyManagement"; // bỏ .html vì Thymeleaf tự hiểu
     }
 
     // 🟢 [POST] /discount-policy
-    @PostMapping
+    @PostMapping("/create")
     public String createPolicy(
             @RequestParam("dealerId") int dealerId,
             @RequestParam("policyName") String policyName,
