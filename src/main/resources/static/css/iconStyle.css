@@ -258,7 +258,8 @@
     }
 
     .icon-btn span{
-        font-size: 11px;
+        font-size: 13px;
+        text-align: center;
     }
 
     .button_vehicle_list{
@@ -270,6 +271,11 @@
         grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
         height: auto;
         max-height: 600px;
+    }
+
+    .mainContainer .d-flex.flex-wrap{
+        justify-content: center;
+        gap: 20px;
     }
 }
 
@@ -331,5 +337,10 @@
 
     h2 {
         font-size: 14px;
+    }
+
+    .mainContainer .d-flex.flex-wrap{
+        flex-direction: column;
+        align-items: center;
     }
 }
