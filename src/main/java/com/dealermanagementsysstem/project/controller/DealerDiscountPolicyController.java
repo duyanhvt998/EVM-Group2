@@ -38,7 +38,7 @@ public class DealerDiscountPolicyController {
 
         if (dealerID == null) {
             model.addAttribute("error", "Không tìm thấy Dealer của email: " + email);
-            return "dealerPage/discountPolicyPage";
+            return "evmPage/homePage";
         }
 
         List<DTODiscountPolicy> policies;
@@ -50,9 +50,10 @@ public class DealerDiscountPolicyController {
             policies = daoPolicy.getPoliciesByDealer(dealerID);
         }
 
+        System.out.println("DEALER ID: " + dealerID);
         model.addAttribute("policies", policies);
         model.addAttribute("newPolicy", new DTODiscountPolicy());
-        return "dealerPage/discountPolicyPage"; // ✅ trỏ về đúng HTML trang
+        return "evmPage/evmDiscountPolicyManagement"; // ✅ trỏ về đúng HTML trang
     }
 
     // ✅ [POST] Tạo Discount Policy mới
@@ -74,7 +75,7 @@ public class DealerDiscountPolicyController {
 
         if (dealerID == null) {
             model.addAttribute("error", "Không tìm thấy Dealer của email: " + email);
-            return "dealerPage/discountPolicyPage";
+            return "evmPage/homePage";
         }
 
         // 🔹 Tạo object DTO
@@ -101,6 +102,6 @@ public class DealerDiscountPolicyController {
         List<DTODiscountPolicy> policies = daoPolicy.getPoliciesByDealer(dealerID);
         model.addAttribute("policies", policies);
         model.addAttribute("newPolicy", new DTODiscountPolicy());
-        return "dealerPage/discountPolicyPage";
+        return "evmPage/evmDiscountPolicyManagement";
     }
 }
