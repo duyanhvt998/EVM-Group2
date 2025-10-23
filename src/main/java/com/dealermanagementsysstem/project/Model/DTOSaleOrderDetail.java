@@ -7,6 +7,7 @@ public class DTOSaleOrderDetail {
     private int saleOrderID;
     private DTOVehicle vehicle;
     private BigDecimal price;
+    private int quotationID; // Link to quotation
 
     public int getSoDetailID() { return soDetailID; }
     public void setSoDetailID(int soDetailID) { this.soDetailID = soDetailID; }
@@ -19,4 +20,7 @@ public class DTOSaleOrderDetail {
 
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }
+
+    public int getQuotationID() { return quotationID; }
+    public void setQuotationID(int quotationID) { this.quotationID = quotationID; }
 }

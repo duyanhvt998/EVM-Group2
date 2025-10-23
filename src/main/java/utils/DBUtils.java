@@ -31,20 +31,20 @@ public class DBUtils {
             String url = System.getProperty("db.url");
             String user = System.getProperty("db.username");
             String pass = System.getProperty("db.password");
-            if (url == null || url.isBlank()) {
+            if (url == null || url.trim().isEmpty()) {
                 url = System.getenv("SPRING_DATASOURCE_URL");
             }
-            if (user == null || user.isBlank()) {
+            if (user == null || user.trim().isEmpty()) {
                 user = System.getenv("SPRING_DATASOURCE_USERNAME");
             }
-            if (pass == null || pass.isBlank()) {
+            if (pass == null || pass.trim().isEmpty()) {
                 pass = System.getenv("SPRING_DATASOURCE_PASSWORD");
             }
 
             // 3) Last fallback to defaults
-            if (url == null || url.isBlank()) url = DEFAULT_DB_URL;
-            if (user == null || user.isBlank()) user = DEFAULT_USER;
-            if (pass == null || pass.isBlank()) pass = DEFAULT_PASS;
+            if (url == null || url.trim().isEmpty()) url = DEFAULT_DB_URL;
+            if (user == null || user.trim().isEmpty()) user = DEFAULT_USER;
+            if (pass == null || pass.trim().isEmpty()) pass = DEFAULT_PASS;
             conn = DriverManager.getConnection(url, user, pass);
         } catch (ClassNotFoundException e) {
             System.err.println("JDBC Driver not found: " + e.getMessage());

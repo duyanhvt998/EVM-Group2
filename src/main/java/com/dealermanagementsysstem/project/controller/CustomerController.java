@@ -33,8 +33,11 @@ public class CustomerController {
 
     // ✅ Hiển thị form thêm mới khách hàng
     @GetMapping("/new")
-    public String showNewForm(Model model) {
+    public String showNewForm(
+            @RequestParam(value = "returnUrl", required = false) String returnUrl,
+            Model model) {
         model.addAttribute("customer", new DTOCustomer());
+        model.addAttribute("returnUrl", returnUrl);
         return "dealerPage/createANewCustomer";
     }
 
@@ -62,6 +65,7 @@ public class CustomerController {
             @RequestParam(value = "TestDriveSchedule", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime testDriveSchedule,
             @RequestParam(value = "VehicleInterest", required = false) String vehicleInterest,
+            @RequestParam(value = "returnUrl", required = false) String returnUrl,
             Model model
     ) {
         System.out.println("🧩 [DEBUG] Request received to insert new customer: " + fullName);
@@ -88,6 +92,11 @@ public class CustomerController {
         if (success) {
             System.out.println("✅ [SUCCESS] Customer created successfully: " + fullName);
             model.addAttribute("message", "Customer created successfully!");
+            
+            // Redirect back to quotation form if returnUrl is provided
+            if (returnUrl != null && !returnUrl.isEmpty()) {
+                return "redirect:" + returnUrl;
+            }
             return "redirect:/customer";
         } else {
             System.out.println("❌ [FAILED] Failed to create customer: " + fullName);

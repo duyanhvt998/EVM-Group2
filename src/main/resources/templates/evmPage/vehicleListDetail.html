@@ -58,10 +58,7 @@
                             <span class="value" th:text="${vehicle.model.modelName}"></span>
                         </div>
 
-                        <div class="info-group">
-                            <span class="label">Brand</span>
-                            <span class="value" th:text="${vehicle.model.brand}"></span>
-                        </div>
+                        <!-- Brand available on DTOEVMVehicle.model.brand for EVM vehicle. Keep as-is. -->
 
                         <div class="info-group">
                             <span class="label">Body Type</span>
@@ -132,6 +129,20 @@
                         <span th:if="${vehicle.model.modelImage == null}">🚗</span>
                     </div>
 
+                    <div class="actions-container">
+                        <div class="title">Quick Actions</div>
+                        <div class="button-group">
+                            <a th:href="@{/quotation/new(vin=${vehicle.VIN})}" class="rounded-btn create-quotation-btn">
+                                <i class="fas fa-file-invoice-dollar"></i> Create Quotation
+                            </a>
+                            <button class="rounded-btn">
+                                <i class="fas fa-edit"></i> Update
+                            </button>
+                            <button class="rounded-btn delete-btn">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

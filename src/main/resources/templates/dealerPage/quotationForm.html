@@ -1,45 +1,114 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Quotation</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/mainPageStyle.css">
+    <link rel="stylesheet" href="/css/iconStyle.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+          integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
     <style>
-        .scroll-box {
-            max-height: 80vh;
-            overflow-y: scroll;
-            background: #fff;
-            border-radius: 10px;
+        .form-container {
+            background: white;
+            border-radius: 15px;
             padding: 30px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin: 20px 0;
         }
-
-        .section-title {
+        .vehicle-info-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .price-breakdown {
+            background: #e8f5e8;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .promotion-section {
+            background: #fff3cd;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .preview-section {
+            background: #d1ecf1;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .form-section {
+            margin-bottom: 25px;
+        }
+        .form-section h5 {
+            color: #495057;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .price-highlight {
+            font-size: 1.3em;
             font-weight: bold;
-            text-decoration: underline;
-            margin-top: 20px;
+            color: #28a745;
         }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .discount-info {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
         }
-
-        th, td {
-            padding: 6px 10px;
-            border: 1px solid #ddd;
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
         }
-
-        th {
-            background-color: #f8f9fa;
+        .price-item:last-child {
+            border-bottom: none;
         }
-
-        .header {
-            text-align: center;
-            font-weight: bold;
-            font-size: 20px;
-            margin-bottom: 10px;
+        .price-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        .price-value {
+            font-weight: 600;
+            color: #212529;
+        }
+        .price-value.discount {
+            color: #dc3545;
+        }
+        .price-value.final {
+            color: #28a745;
+        }
+        .price-item.total-row {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+            margin-top: 10px;
+        }
+        .price-value.total {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #007bff;
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .fa-spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -49,53 +118,204 @@
     <div th:replace="mainPage/navBarFragment :: navBar"></div>
 
     <div class="mainContent flex-grow-1 p-3" style="overflow: hidden">
-        <h2 class="mb-3">Create New Quotation</h2>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-file-invoice-dollar me-2"></i>Create New Quotation</h2>
+            <a href="/evm/vehicle/list" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Vehicle List
+            </a>
+        </div>
 
-        <div class="scroll-box">
-            <form th:action="@{/quotation/save}" th:object="${quotation}" method="post">
+        <!-- Success/Error Messages -->
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
 
-                <!-- Dealer selection -->
-                <div class="mb-3">
-                    <label for="dealer" class="form-label">Select Dealer:</label>
-                    <select id="dealer" name="dealerID" class="form-select" required>
-                        <option value="">-- Choose Dealer --</option>
-                        <option th:each="dealer : ${dealerList}"
-                                th:value="${dealer.dealerID}"
-                                th:text="${dealer.dealerName}">
-                        </option>
-                    </select>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Vehicle Information Display -->
+        <div th:if="${vehicle != null}" class="vehicle-info-card">
+            <h5><i class="fas fa-car me-2"></i>Selected Vehicle</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>VIN:</strong> <span th:text="${vehicle.VIN}"></span></p>
+                    <p><strong>Model:</strong> <span th:text="${vehicle.modelName}"></span></p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Year:</strong> <span th:text="${vehicle.manufactureYear}"></span></p>
+                    <p><strong>Color:</strong> <span th:text="${vehicle.colorName}"></span></p>
+                    <p><strong>Base Price:</strong> $<span th:text="${#numbers.formatDecimal(vehicle.basePrice, 1, 2)}"></span></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Error message if vehicle not found -->
+        <div th:if="${vehicle == null}" class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Error:</strong> Vehicle information not found. Please go back to the vehicle list and try again.
+            <br>
+            <a href="/evm/vehicle/list" class="btn btn-outline-primary btn-sm mt-2">
+                <i class="fas fa-arrow-left me-1"></i>Back to Vehicle List
+            </a>
+        </div>
+
+        <!-- Quotation Form -->
+        <div class="form-container" th:if="${vehicle != null}">
+            <form th:action="@{/quotation/save}" method="post" id="quotationForm">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" name="vin" th:value="${vehicle.VIN}">
+                <input type="hidden" id="vehicleModel" th:value="${vehicle.modelName}">
+
+                <!-- Dealer Selection (if no dealer in session) -->
+                <div class="form-section">
+                    <h5><i class="fas fa-building me-2"></i>Dealer Information</h5>
+                    <div th:if="${dealer != null}">
+                        <p class="mb-2"><strong>Dealer:</strong> <span th:text="${dealer.dealerName}"></span></p>
+                        <input type="hidden" name="dealerID" th:value="${dealer.dealerID}" />
+                    </div>
+                    <div th:if="${dealer == null}">
+                        <label class="form-label">Select Dealer:</label>
+                        <select name="dealerID" class="form-select" required>
+                            <option value="">-- Choose Dealer --</option>
+                            <option th:each="d : ${dealerList}" th:value="${d.dealerID}" th:text="${d.dealerName}"></option>
+                        </select>
+                        <small class="form-text text-muted">No dealer in session. Please select a dealer.</small>
+                    </div>
                 </div>
 
-                <!-- Vehicle info -->
-                <p class="section-title">Vehicle Information</p>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Model Name</th>
-                        <th>Year</th>
-                        <th>Qty</th>
-                        <th>Unit Price (VND)</th>
-                        <th>Total (VND)</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td><input type="text" class="form-control" name="modelName" placeholder="Model name"></td>
-                        <td><input type="number" class="form-control" name="manufactureYear" placeholder="Year"></td>
-                        <td><input type="number" class="form-control" name="quantity" placeholder="Qty" min="1" value="1"></td>
-                        <td><input type="number" class="form-control" name="unitPrice" placeholder="Unit Price"></td>
-                        <td><input type="number" class="form-control" name="totalPrice" placeholder="Total" readonly></td>
-                    </tr>
-                    </tbody>
-                </table>
-
-                <div class="mt-3">
-                    <label class="form-label">Notes:</label>
-                    <textarea class="form-control" name="notes" rows="3" placeholder="Enter notes here..."></textarea>
+                <!-- Customer Selection -->
+                <div class="form-section">
+                    <h5><i class="fas fa-user me-2"></i>Customer Information</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Select Customer:</label>
+                            <select name="customerID" class="form-select" required id="customerSelect">
+                                <option value="">-- Choose Customer --</option>
+                                <option th:each="customer : ${customerList}" 
+                                        th:value="${customer.customerID}" 
+                                        th:text="${customer.fullName + ' (' + customer.phone + ')'}">
+                                </option>
+                            </select>
+                            <small class="form-text text-muted">Select an existing customer or create a new one</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Quantity:</label>
+                            <input type="number" name="quantity" class="form-control" min="1" value="1" required>
+                            <small class="form-text text-muted">Number of vehicles to quote</small>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <a th:href="@{/customer/new(returnUrl='/quotation/new?vin=' + ${vehicle.VIN})}" 
+                               class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-plus me-1"></i>Create New Customer
+                            </a>
+                            <small class="form-text text-muted ms-2">Click to create a new customer and return to this form</small>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="mt-4 text-center">
-                    <button type="submit" class="btn btn-success px-4">Create Quotation</button>
+                <!-- Dealer Promotion Policy -->
+                <div class="form-section">
+                    <h5><i class="fas fa-tags me-2"></i>Dealer Promotion Policy</h5>
+                    <div class="promotion-section">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">Select Promotion:</label>
+                                <select name="promotionID" class="form-select" id="promotionSelect">
+                                    <option value="">-- No Promotion --</option>
+                                    <option value="1">Holiday Special (10% off)</option>
+                                    <option value="2">Bulk Purchase (15% off)</option>
+                                    <option value="3">Loyalty Discount (5% off)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Custom Discount %:</label>
+                                <input type="number" name="customDiscount" class="form-control" min="0" max="50" 
+                                       step="0.1" placeholder="0.0" id="customDiscount">
+                                <small class="form-text text-muted">Enter custom discount percentage (0-50%)</small>
+                            </div>
+                        </div>
+                        <div id="discountInfo" class="discount-info" style="display: none;">
+                            <strong>Applied Discount:</strong> <span id="discountAmount">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Price Calculation -->
+                <div class="form-section">
+                    <h5><i class="fas fa-calculator me-2"></i>Price Summary</h5>
+                    <div class="price-breakdown">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="price-item">
+                                    <span class="price-label">Base Price:</span>
+                                    <span class="price-value" id="basePrice">$<span th:text="${#numbers.formatDecimal(vehicle.basePrice, 1, 2)}"></span></span>
+                                </div>
+                                <div class="price-item">
+                                    <span class="price-label">Discount:</span>
+                                    <span class="price-value discount" id="discountDisplay">0%</span>
+                                </div>
+                                <div class="price-item">
+                                    <span class="price-label">Unit Price:</span>
+                                    <span class="price-value final" id="finalPrice">$<span th:text="${#numbers.formatDecimal(vehicle.basePrice, 1, 2)}"></span></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="price-item">
+                                    <span class="price-label">Quantity:</span>
+                                    <span class="price-value" id="quantityDisplay">1</span>
+                                </div>
+                                <div class="price-item total-row">
+                                    <span class="price-label">Total Amount:</span>
+                                    <span class="price-value total" id="totalAmount">$<span th:text="${#numbers.formatDecimal(vehicle.basePrice, 1, 2)}"></span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quotation Preview -->
+                <div class="form-section">
+                    <h5><i class="fas fa-eye me-2"></i>Quotation Preview</h5>
+                    <div class="preview-section">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Customer Information</h6>
+                                <p><strong>Customer ID:</strong> <span id="previewCustomerID">-</span></p>
+                                <p><strong>Vehicle:</strong> <span th:text="${vehicle.modelName}"></span></p>
+                                <p><strong>VIN:</strong> <span th:text="${vehicle.VIN}"></span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Pricing Summary</h6>
+                                <p><strong>Base Price:</strong> $<span id="previewBasePrice" th:text="${#numbers.formatDecimal(vehicle.basePrice, 1, 2)}"></span></p>
+                                <p><strong>Discount:</strong> <span id="previewDiscount">0%</span></p>
+                                <p><strong>Final Price:</strong> $<span id="previewFinalPrice" th:text="${#numbers.formatDecimal(vehicle.basePrice, 1, 2)}"></span></p>
+                                <p><strong>Quantity:</strong> <span id="previewQuantity">1</span></p>
+                                <p><strong>Total:</strong> $<span id="previewTotal" th:text="${#numbers.formatDecimal(vehicle.basePrice, 1, 2)}"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="/evm/vehicle/list" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Cancel
+                    </a>
+                    <div>
+                        <button type="button" class="btn btn-info me-2" id="previewBtn">
+                            <i class="fas fa-file-pdf me-2"></i>Preview PDF
+                        </button>
+                        <button type="submit" class="btn btn-success" id="createQuotationBtn">
+                            <i class="fas fa-save me-2"></i>Create Quotation
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -104,5 +324,288 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/scripts/navBarMenuProject.js"></script>
+
+<script>
+    // Price calculation logic
+    const basePrice = parseFloat(document.getElementById('basePrice').textContent.replace('$', ''));
+    let currentDiscount = 0;
+    let quantity = 1;
+
+    function updatePriceCalculation() {
+        const discountSelect = document.getElementById('promotionSelect');
+        const customDiscount = parseFloat(document.getElementById('customDiscount').value) || 0;
+        
+        // Get discount from promotion or custom
+        if (discountSelect.value) {
+            const discountMap = {
+                '1': 10,  // Holiday Special
+                '2': 15,  // Bulk Purchase
+                '3': 5    // Loyalty Discount
+            };
+            currentDiscount = discountMap[discountSelect.value] || 0;
+        } else {
+            currentDiscount = customDiscount;
+        }
+
+        // Calculate final price
+        const finalPrice = basePrice * (1 - currentDiscount / 100);
+        const totalAmount = finalPrice * quantity;
+
+        // Update displays
+        document.getElementById('discountDisplay').textContent = currentDiscount + '%';
+        document.getElementById('finalPrice').textContent = '$' + finalPrice.toFixed(2);
+        document.getElementById('totalAmount').textContent = '$' + totalAmount.toFixed(2);
+        document.getElementById('quantityDisplay').textContent = quantity;
+
+        // Update preview
+        document.getElementById('previewBasePrice').textContent = basePrice.toFixed(2);
+        document.getElementById('previewDiscount').textContent = currentDiscount + '%';
+        document.getElementById('previewFinalPrice').textContent = finalPrice.toFixed(2);
+        document.getElementById('previewQuantity').textContent = quantity;
+        document.getElementById('previewTotal').textContent = totalAmount.toFixed(2);
+
+        // Show discount info
+        const discountInfo = document.getElementById('discountInfo');
+        const discountAmount = document.getElementById('discountAmount');
+        if (currentDiscount > 0) {
+            discountInfo.style.display = 'block';
+            discountAmount.textContent = currentDiscount + '%';
+        } else {
+            discountInfo.style.display = 'none';
+        }
+    }
+
+    // Event listeners
+    document.getElementById('promotionSelect').addEventListener('change', function() {
+        if (this.value) {
+            document.getElementById('customDiscount').value = '';
+        }
+        updatePriceCalculation();
+    });
+
+    document.getElementById('customDiscount').addEventListener('input', function() {
+        if (this.value) {
+            document.getElementById('promotionSelect').value = '';
+        }
+        updatePriceCalculation();
+    });
+
+    document.querySelector('input[name="quantity"]').addEventListener('input', function() {
+        quantity = parseInt(this.value) || 1;
+        document.getElementById('previewQuantity').textContent = quantity;
+        updatePriceCalculation();
+    });
+
+    document.getElementById('customerSelect').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const customerName = selectedOption.text || '-';
+        document.getElementById('previewCustomerID').textContent = customerName;
+    });
+
+    // Preview button - Generate PDF-like preview in new window
+    document.getElementById('previewBtn').addEventListener('click', function() {
+        const customerSelect = document.getElementById('customerSelect');
+        const selectedCustomer = customerSelect.options[customerSelect.selectedIndex].text || 'Not specified';
+        
+        // Get vehicle model name from hidden input
+        const vehicleModel = document.getElementById('vehicleModel').value || 'Unknown Vehicle';
+        
+        // Validate required fields
+        if (!customerSelect.value) {
+            alert('Please select a customer before previewing the quotation.');
+            return;
+        }
+        
+        if (quantity < 1) {
+            alert('Please enter a valid quantity (minimum 1).');
+            return;
+        }
+        
+        // Calculate final values
+        const finalPrice = basePrice * (1 - currentDiscount / 100);
+        const totalAmount = finalPrice * quantity;
+        
+        // Create preview content
+        const previewContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quotation Preview</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f8f9fa; }
+        .quotation-preview { background: white; border-radius: 10px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto; }
+        .header { text-align: center; border-bottom: 3px solid #007bff; padding-bottom: 20px; margin-bottom: 30px; }
+        .title { font-size: 2.5em; font-weight: bold; color: #007bff; margin-bottom: 10px; }
+        .section { margin-bottom: 25px; }
+        .section h5 { color: #495057; border-bottom: 2px solid #e9ecef; padding-bottom: 8px; margin-bottom: 15px; }
+        .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f8f9fa; }
+        .info-label { font-weight: 500; color: #495057; }
+        .info-value { font-weight: 600; color: #212529; }
+        .price-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .price-table th, .price-table td { padding: 12px; text-align: left; border-bottom: 1px solid #dee2e6; }
+        .price-table th { background-color: #f8f9fa; font-weight: 600; }
+        .total-row { background-color: #f8f9fa; font-weight: bold; }
+        .btn-print { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        .btn-print:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="quotation-preview">
+        <div class="header">
+            <div class="title">VEHICLE QUOTATION</div>
+            <div class="text-muted">Preview - ${new Date().toLocaleDateString()}</div>
+        </div>
+        
+        <div class="section">
+            <h5>Customer Information</h5>
+            <div class="info-row">
+                <span class="info-label">Customer:</span>
+                <span class="info-value">${selectedCustomer}</span>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h5>Vehicle Information</h5>
+            <div class="info-row">
+                <span class="info-label">Vehicle Model:</span>
+                <span class="info-value">${vehicleModel}</span>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h5>Pricing Details</h5>
+            <table class="price-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>${vehicleModel}</td>
+                        <td>${quantity}</td>
+                        <td>$${finalPrice.toFixed(2)}</td>
+                        <td>$${totalAmount.toFixed(2)}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section">
+            <h5>Price Breakdown</h5>
+            <div class="info-row">
+                <span class="info-label">Base Price:</span>
+                <span class="info-value">$${basePrice.toFixed(2)}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Discount Applied:</span>
+                <span class="info-value">${currentDiscount}%</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Final Unit Price:</span>
+                <span class="info-value">$${finalPrice.toFixed(2)}</span>
+            </div>
+            <div class="info-row total-row">
+                <span class="info-label">Total Amount:</span>
+                <span class="info-value">$${totalAmount.toFixed(2)}</span>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <button class="btn-print" onclick="window.print()">Print / Save as PDF</button>
+        </div>
+    </div>
+</body>
+</html>`;
+        
+        // Open preview in new window
+        const previewWindow = window.open('', '_blank', 'width=900,height=700,scrollbars=yes,resizable=yes');
+        previewWindow.document.write(previewContent);
+        previewWindow.document.close();
+    });
+
+    // Form submission validation
+    document.getElementById('quotationForm').addEventListener('submit', function(e) {
+        console.log('Form submission started');
+        
+        const customerSelect = document.getElementById('customerSelect');
+        const quantityInput = document.querySelector('input[name="quantity"]');
+        
+        // Validate dealer selection (if no dealer in session)
+        const dealerSelect = document.querySelector('select[name="dealerID"]');
+        if (dealerSelect && !dealerSelect.value) {
+            e.preventDefault();
+            alert('Please select a dealer before creating the quotation.');
+            dealerSelect.focus();
+            return false;
+        }
+        
+        // Validate customer selection
+        if (!customerSelect.value) {
+            e.preventDefault();
+            alert('Please select a customer before creating the quotation.');
+            customerSelect.focus();
+            return false;
+        }
+        
+        // Validate quantity
+        const quantity = parseInt(quantityInput.value);
+        if (!quantity || quantity < 1) {
+            e.preventDefault();
+            alert('Please enter a valid quantity (minimum 1).');
+            quantityInput.focus();
+            return false;
+        }
+        
+        // Show confirmation
+        const selectedCustomer = customerSelect.options[customerSelect.selectedIndex].text;
+        const vehicleModel = document.getElementById('vehicleModel').value;
+        const finalPrice = basePrice * (1 - currentDiscount / 100);
+        const totalAmount = finalPrice * quantity;
+        
+        const confirmed = confirm(`Create Quotation?\n\n` +
+            `Customer: ${selectedCustomer}\n` +
+            `Vehicle: ${vehicleModel}\n` +
+            `Quantity: ${quantity}\n` +
+            `Total Amount: $${totalAmount.toFixed(2)}\n\n` +
+            `Click OK to create the quotation.`);
+        
+        if (!confirmed) {
+            e.preventDefault();
+            console.log('User cancelled quotation creation');
+            return false;
+        }
+        
+        console.log('User confirmed quotation creation, proceeding...');
+        
+        // Show loading state
+        const submitBtn = document.getElementById('createQuotationBtn');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating...';
+        submitBtn.disabled = true;
+        
+        // Add timeout to reset button if form doesn't submit within 30 seconds
+        setTimeout(() => {
+            if (submitBtn.disabled) {
+                console.log('Form submission timed out, resetting button');
+                submitBtn.innerHTML = '<i class="fas fa-save me-2"></i>Create Quotation';
+                submitBtn.disabled = false;
+                alert('Form submission timed out. Please try again.');
+            }
+        }, 30000);
+        
+        console.log('Allowing form to submit');
+        // Allow form to submit
+        return true;
+    });
+
+    // Initialize
+    updatePriceCalculation();
+</script>
 </body>
 </html>

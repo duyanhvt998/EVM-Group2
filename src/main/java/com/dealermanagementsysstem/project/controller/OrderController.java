@@ -33,10 +33,43 @@ public class OrderController {
 
     //  Hiển thị form tạo đơn hàng mới
     @GetMapping("/new")
-    public String showCreateForm(Model model) {
-        model.addAttribute("order", new DTOSaleOrder());
-        model.addAttribute("detail", new DTOSaleOrderDetail());
-        return "dealerPage/createSaleOrder"; // 👉 form tạo order
+    public String showCreateForm(Model model, HttpSession session) {
+        System.out.println("📋 [DEBUG] Loading create order form with approved quotations");
+
+        try {
+            // Get dealer ID from session
+            DTOAccount account = (DTOAccount) session.getAttribute("user");
+            if (account == null || account.getDealerId() == null) {
+                model.addAttribute("error", "Bạn cần đăng nhập bằng tài khoản dealer!");
+                return "redirect:/login";
+            }
+
+            // Get approved quotations for this dealer
+            DAOQuotation quotationDAO = new DAOQuotation();
+            List<DTOQuotation> approvedQuotations = quotationDAO.getQuotationsByDealer(account.getDealerId())
+                    .stream()
+                    .filter(q -> "Approved".equalsIgnoreCase(q.getStatus()))
+                    .toList();
+
+            if (approvedQuotations.isEmpty()) {
+                model.addAttribute("error", "No approved quotations found. Please create and approve a quotation first.");
+                model.addAttribute("redirectUrl", "/quotation/list");
+                return "dealerPage/noQuotations";
+            }
+
+            model.addAttribute("order", new DTOSaleOrder());
+            model.addAttribute("detail", new DTOSaleOrderDetail());
+            model.addAttribute("quotations", approvedQuotations);
+            model.addAttribute("message", "Found " + approvedQuotations.size() + " approved quotations");
+
+            System.out.println("✅ [SUCCESS] Loaded " + approvedQuotations.size() + " approved quotations");
+            return "dealerPage/createSaleOrder";
+        } catch (Exception e) {
+            System.out.println("❌ [ERROR] Failed to load create order form: " + e.getMessage());
+            e.printStackTrace();
+            model.addAttribute("error", "Failed to load create order form: " + e.getMessage());
+            return "dealerPage/errorPage";
+        }
     }
 
     //  Xử lý khi submit form tạo đơn hàng
@@ -45,12 +78,12 @@ public class OrderController {
             @RequestParam("customerID") int customerID,
             @RequestParam("staffID") int staffID,
             @RequestParam("vin") String vin,
-            @RequestParam("price") java.math.BigDecimal price,
+            @RequestParam("quotationID") int quotationID,
             @RequestParam(value = "status", required = false, defaultValue = "Pending") String status,
             HttpSession session,
             Model model
     ) {
-        System.out.println("🧩 [DEBUG] Creating SaleOrder for CustomerID: " + customerID + ", VIN: " + vin);
+        System.out.println("🧩 [DEBUG] Creating SaleOrder for CustomerID: " + customerID + ", VIN: " + vin + ", QuotationID: " + quotationID);
 
         //  Lấy dealerID từ tài khoản đang đăng nhập
         DTOAccount account = (DTOAccount) session.getAttribute("user");
@@ -67,6 +100,51 @@ public class OrderController {
             return "redirect:/saleorder";
         }
 
+        // 🔥 MANDATORY QUOTATION VALIDATION
+        DAOQuotation quotationDAO = new DAOQuotation();
+        
+        // 1. Check if quotation exists
+        DTOQuotation quotation = quotationDAO.getQuotationById(quotationID);
+        if (quotation == null) {
+            System.out.println("❌ [ERROR] Quotation not found: " + quotationID);
+            model.addAttribute("error", "Quotation not found! Please select a valid quotation.");
+            return "redirect:/quotation/list";
+        }
+
+        // 2. Check if quotation is approved
+        if (!quotationDAO.isQuotationApproved(quotationID)) {
+            System.out.println("❌ [ERROR] Quotation not approved: " + quotationID + ", Status: " + quotation.getStatus());
+            model.addAttribute("error", "Quotation must be approved before creating sale order! Current status: " + quotation.getStatus());
+            return "redirect:/quotation/list";
+        }
+
+        // 3. Validate quotation belongs to same dealer
+        if (quotation.getDealer().getDealerID() != dealerID) {
+            System.out.println("❌ [ERROR] Quotation belongs to different dealer: " + quotation.getDealer().getDealerID() + " vs " + dealerID);
+            model.addAttribute("error", "Quotation belongs to different dealer!");
+            return "redirect:/quotation/list";
+        }
+
+        // 4. Validate customer matches
+        if (quotation.getCustomer().getCustomerID() != customerID) {
+            System.out.println("❌ [ERROR] Customer mismatch: " + quotation.getCustomer().getCustomerID() + " vs " + customerID);
+            model.addAttribute("error", "Customer does not match quotation!");
+            return "redirect:/quotation/list";
+        }
+
+        // 5. Get price from quotation details
+        List<DTOQuotationDetail> quotationDetails = quotationDAO.getQuotationDetails(quotationID);
+        if (quotationDetails.isEmpty()) {
+            System.out.println("❌ [ERROR] No quotation details found for quotation: " + quotationID);
+            model.addAttribute("error", "Quotation details not found!");
+            return "redirect:/quotation/list";
+        }
+
+        DTOQuotationDetail quotationDetail = quotationDetails.get(0);
+        java.math.BigDecimal price = quotationDetail.getUnitPrice();
+
+        System.out.println("✅ [VALIDATION] Quotation validation passed - ID: " + quotationID + ", Price: " + price);
+
         // --- Tạo các đối tượng DTO ---
         DTOSaleOrder order = new DTOSaleOrder();
         order.setCustomer(new DTOCustomer());
@@ -81,13 +159,14 @@ public class OrderController {
         order.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
         order.setStatus(status);
 
-        // --- Chi tiết đơn hàng ---
+        // --- Chi tiết đơn hàng với giá từ quotation ---
         DTOVehicle vehicle = new DTOVehicle();
         vehicle.setVIN(vin);
 
         DTOSaleOrderDetail detail = new DTOSaleOrderDetail();
         detail.setVehicle(vehicle);
-        detail.setPrice(price);
+        detail.setPrice(price); // ✅ Sử dụng giá từ quotation
+        detail.setQuotationID(quotationID); // ✅ Link to quotation
 
         List<DTOSaleOrderDetail> detailList = new ArrayList<>();
         detailList.add(detail);
@@ -98,8 +177,8 @@ public class OrderController {
         boolean success = dao.insertSaleOrder(order);
 
         if (success) {
-            System.out.println(" [SUCCESS] SaleOrder created successfully for DealerID: " + dealerID + ", VIN: " + vin);
-            model.addAttribute("message", "Sale order created successfully!");
+            System.out.println("✅ [SUCCESS] SaleOrder created successfully for DealerID: " + dealerID + ", VIN: " + vin + ", QuotationID: " + quotationID);
+            model.addAttribute("message", "Sale order created successfully from approved quotation!");
             return "redirect:/saleorder";
         } else {
             System.out.println(" [FAILED] Failed to create SaleOrder for DealerID: " + dealerID + ", VIN: " + vin);

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quotation Details</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/mainPageStyle.css">
+    <link rel="stylesheet" href="/css/iconStyle.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+          integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <style>
+        .detail-card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status-badge {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        .status-pending { background-color: #fff3cd; color: #856404; }
+        .status-accepted { background-color: #d4edda; color: #155724; }
+        .status-rejected { background-color: #f8d7da; color: #721c24; }
+        .price-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .price-highlight {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #666;
+        }
+        .info-value {
+            color: #333;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+<div class="d-flex">
+    <div th:replace="mainPage/navBarFragment :: navBar"></div>
+
+    <div class="mainContent flex-grow-1 p-3" style="overflow: hidden">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-file-invoice-dollar me-2"></i>Quotation Details</h2>
+            <a href="/quotation/list" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to List
+            </a>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- Quotation Details -->
+        <div th:if="${quotation != null}">
+            <!-- Header Section -->
+            <div class="detail-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4>Quotation #<span th:text="${quotation.quotationID}"></span></h4>
+                    <span th:classappend="${'status-' + quotation.status.toLowerCase()}" 
+                          class="status-badge" 
+                          th:text="${quotation.status}"></span>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-row">
+                            <span class="info-label">Created Date:</span>
+                            <span class="info-value" th:text="${#dates.format(quotation.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Dealer:</span>
+                            <span class="info-value" th:text="${quotation.dealer.dealerName}"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-row">
+                            <span class="info-label">Dealer Email:</span>
+                            <span class="info-value" th:text="${quotation.dealer.email}"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Dealer Phone:</span>
+                            <span class="info-value" th:text="${quotation.dealer.phone}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Information -->
+            <div class="detail-card">
+                <h5><i class="fas fa-user me-2"></i>Customer Information</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-row">
+                            <span class="info-label">Name:</span>
+                            <span class="info-value" th:text="${quotation.customer.fullName}"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Email:</span>
+                            <span class="info-value" th:text="${quotation.customer.email}"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-row">
+                            <span class="info-label">Phone:</span>
+                            <span class="info-value" th:text="${quotation.customer.phone}"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Address:</span>
+                            <span class="info-value" th:text="${quotation.customer.address}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vehicle Information -->
+            <div class="detail-card" th:if="${quotation.vehicle != null}">
+                <h5><i class="fas fa-car me-2"></i>Vehicle Information</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-row">
+                            <span class="info-label">VIN:</span>
+                            <span class="info-value" th:text="${quotation.vehicle.VIN}"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Model:</span>
+                            <span class="info-value" th:text="${quotation.vehicle.modelName}"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-row">
+                            <span class="info-label">Year:</span>
+                            <span class="info-value" th:text="${quotation.vehicle.manufactureYear}"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Color:</span>
+                            <span class="info-value" th:text="${quotation.vehicle.colorName}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- No Vehicle Information -->
+            <div class="detail-card" th:if="${quotation.vehicle == null}">
+                <h5><i class="fas fa-car me-2"></i>Vehicle Information</h5>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    No vehicle information available for this quotation.
+                </div>
+            </div>
+
+            <!-- Price Information -->
+            <div class="detail-card">
+                <h5><i class="fas fa-dollar-sign me-2"></i>Price Information</h5>
+                <div class="price-section">
+                    <div class="text-center">
+                        <div class="price-highlight" th:text="${'$' + #numbers.formatDecimal(quotation.totalPrice, 1, 2)}"></div>
+                        <small class="text-muted">Final Price (after discounts)</small>
+                    </div>
+                </div>
+                
+                <!-- Quotation Details -->
+                <div th:if="${details != null and !details.empty}">
+                    <h6 class="mt-3">Quotation Details:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>VIN</th>
+                                    <th>Model</th>
+                                    <th>Color</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="detail : ${details}">
+                                    <td th:text="${detail.VIN}"></td>
+                                    <td th:text="${detail.modelName}"></td>
+                                    <td th:text="${detail.colorName}"></td>
+                                    <td th:text="${detail.quantity}"></td>
+                                    <td th:text="${'$' + #numbers.formatDecimal(detail.unitPrice, 1, 2)}"></td>
+                                    <td th:text="${'$' + #numbers.formatDecimal(detail.unitPrice * detail.quantity, 1, 2)}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="detail-card">
+                <h5><i class="fas fa-cogs me-2"></i>Actions</h5>
+                <div class="d-flex gap-3">
+                    <div th:if="${quotation.status == 'Pending'}">
+                        <form th:action="@{/quotation/approve/{id}(id=${quotation.quotationID})}" 
+                              method="post" style="display: inline;">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <button type="submit" class="btn btn-success"
+                                    onclick="return confirm('Approve this quotation?')">
+                                <i class="fas fa-check me-2"></i>Approve Quotation
+                            </button>
+                        </form>
+                        
+                        <form th:action="@{/quotation/reject/{id}(id=${quotation.quotationID})}" 
+                              method="post" style="display: inline;">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <button type="submit" class="btn btn-danger"
+                                    onclick="return confirm('Reject this quotation?')">
+                                <i class="fas fa-times me-2"></i>Reject Quotation
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div th:if="${quotation.status == 'Accepted'}">
+                        <a th:href="@{/saleorder/new?quotationID={id}(id=${quotation.quotationID})}" 
+                           class="btn btn-primary">
+                            <i class="fas fa-shopping-cart me-2"></i>Create Sale Order
+                        </a>
+                    </div>
+                    
+                    <a th:href="@{/quotation/list}" class="btn btn-outline-secondary">
+                        <i class="fas fa-list me-2"></i>Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quotation Not Found -->
+        <div th:if="${quotation == null}" class="text-center py-5">
+            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+            <h4 class="text-warning">Quotation Not Found</h4>
+            <p class="text-muted">The requested quotation could not be found.</p>
+            <a href="/quotation/list" class="btn btn-primary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Quotations
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/scripts/navBarMenuProject.js"></script>
+</body>
+</html>
