@@ -11,41 +11,263 @@
           integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
     <style>
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+
         .quotation-card {
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: box-shadow 0.3s ease;
+            position: relative;
+            border: 2px solid #cccccc;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            background: white;
+            box-shadow: 0 8px 24px rgba(255, 107, 0, 0.15),
+            0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out;
         }
+
+        .quotation-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                    90deg,
+                    transparent,
+                    rgba(255, 107, 0, 0.1),
+                    transparent
+            );
+            transition: left 0.6s ease;
+        }
+
+        .quotation-card:hover::before {
+            left: 100%;
+        }
+
         .quotation-card:hover {
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 16px 40px rgba(255, 107, 0, 0.3),
+            0 8px 16px rgba(0, 0, 0, 0.4);
+            border-color: #ff6b00;
         }
+
+        .quotation-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff6b00, #ff8c00, #ff6b00);
+            background-size: 200% 100%;
+            animation: shimmer 3s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .quotation-card:hover::after {
+            opacity: 1;
+        }
+
         .status-badge {
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.8em;
-            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
         }
-        .status-pending { background-color: #fff3cd; color: #856404; }
-        .status-accepted { background-color: #d4edda; color: #155724; }
-        .status-rejected { background-color: #f8d7da; color: #721c24; }
+
+        .status-badge::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease;
+        }
+
+        .status-badge:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, #ff8c00 0%, #ff6b00 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(255, 107, 0, 0.3);
+        }
+
+        .status-pending:hover {
+            transform: scale(1.1) rotate(-2deg);
+            box-shadow: 0 6px 20px rgba(255, 107, 0, 0.5);
+        }
+
+        .status-accepted {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        .status-accepted:hover {
+            transform: scale(1.1) rotate(2deg);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.5);
+        }
+
+        .status-rejected {
+            background: linear-gradient(135deg, #333 0%, #1a1a1a 100%);
+            color: #ff6b00;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            border: 1px solid #ff6b00;
+        }
+
+        .status-rejected:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4);
+        }
+
         .price-highlight {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #28a745;
+            font-size: 1.5em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 50%, #ffaa00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            background-size: 200% 200%;
+            animation: shimmer 3s ease infinite;
+            text-shadow: 0 0 20px rgba(255, 107, 0, 0.3);
+            transition: all 0.3s ease;
+            display: inline-block;
         }
+
+        .price-highlight:hover {
+            transform: scale(1.15);
+            filter: drop-shadow(0 0 8px rgba(255, 107, 0, 0.6));
+            animation: pulse 1s ease infinite;
+        }
+
         .action-buttons {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
         }
+
         .btn-action {
-            padding: 8px 16px;
-            border-radius: 5px;
+            padding: 12px 24px;
+            border-radius: 8px;
             text-decoration: none;
-            font-size: 0.9em;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-action::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s ease, height 0.5s ease;
+        }
+
+        .btn-action:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 107, 0, 0.4);
+        }
+
+        .btn-action:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        /* Primary button variant */
+        .btn-action.btn-primary {
+            background: linear-gradient(135deg, #ff6b00 0%, #ff8c00 100%);
+            color: white;
+            border-color: #ff6b00;
+        }
+
+        .btn-action.btn-primary:hover {
+            background: linear-gradient(135deg, #ff8c00 0%, #ffaa00 100%);
+            box-shadow: 0 8px 24px rgba(255, 107, 0, 0.5);
+        }
+
+        /* Secondary button variant */
+        .btn-action.btn-secondary {
+            background: transparent;
+            color: #ff6b00;
+            border-color: #ff6b00;
+        }
+
+        .btn-action.btn-secondary:hover {
+            background: #ff6b00;
+            color: white;
+            box-shadow: 0 8px 24px rgba(255, 107, 0, 0.4);
+        }
+
+        /* Dark button variant */
+        .btn-action.btn-dark {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            color: #ff6b00;
+            border-color: #2a2a2a;
+        }
+
+        .btn-action.btn-dark:hover {
+            background: linear-gradient(135deg, #1a1a1a 0%, #000 100%);
+            border-color: #ff6b00;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
         }
     </style>
 </head>
@@ -55,114 +277,120 @@
     <div th:replace="mainPage/navBarFragment :: navBar"></div>
 
     <div class="mainContent flex-grow-1 p-3" style="overflow: hidden">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="fas fa-file-invoice-dollar me-2"></i>Quotation Management</h2>
-            <a href="/quotation/new" class="btn btn-primary">
-                <i class="fas fa-plus me-2"></i>Create New Quotation
-            </a>
-        </div>
 
-        <!-- Success/Error Messages -->
-        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i>
-            <span th:text="${message}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+        <div style="overflow-y: auto; overflow-x: hidden; height: 95vh;">
 
-        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            <span th:text="${error}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-file-invoice-dollar me-2"></i>Quotation Management</h2>
+                <a href="/quotation/new" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Create New Quotation
+                </a>
+            </div>
 
-        <!-- Quotations List -->
-        <div th:if="${quotations != null and !quotations.empty}">
-            <div class="row">
-                <div th:each="quotation : ${quotations}" class="col-md-6 col-lg-4 mb-3">
-                    <div class="quotation-card">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <h5 class="mb-0">Quotation #<span th:text="${quotation.quotationID}"></span></h5>
-                            <span th:classappend="${'status-' + quotation.status.toLowerCase()}" 
-                                  class="status-badge" 
-                                  th:text="${quotation.status}"></span>
-                        </div>
+            <!-- Success/Error Messages -->
+            <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <span th:text="${message}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
 
-                        <div class="mb-3">
-                            <div class="row">
-                                <div class="col-6">
-                                    <strong>Customer:</strong><br>
-                                    <span th:text="${quotation.customer.fullName}"></span><br>
-                                    <small class="text-muted" th:text="${quotation.customer.email}"></small>
-                                </div>
-                                <div class="col-6">
-                                    <strong>Vehicle:</strong><br>
-                                    <span th:if="${quotation.vehicle != null}" th:text="${quotation.vehicle.modelName}"></span>
-                                    <span th:if="${quotation.vehicle == null}" class="text-muted">No vehicle information</span><br>
-                                    <small class="text-muted" th:if="${quotation.vehicle != null}" th:text="${quotation.vehicle.VIN}"></small>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Quotations List -->
+            <div th:if="${quotations != null and !quotations.empty}">
+                <div class="row">
+                    <div th:each="quotation : ${quotations}" class="col-md-6 col-lg-4 mb-3">
+                        <div class="quotation-card">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="mb-0">Quotation #<span th:text="${quotation.quotationID}"></span></h5>
+                                <span th:classappend="${'status-' + quotation.status.toLowerCase()}"
+                                      class="status-badge"
+                                      th:text="${quotation.status}"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <strong>Customer:</strong><br>
+                                        <span th:text="${quotation.customer.fullName}"></span><br>
+                                        <small class="text-muted" th:text="${quotation.customer.email}"></small>
+                                    </div>
+                                    <div class="col-6">
+                                        <strong>Vehicle:</strong><br>
+                                        <span th:if="${quotation.vehicle != null}" th:text="${quotation.vehicle.modelName}"></span>
+                                        <span th:if="${quotation.vehicle == null}" class="text-muted">No vehicle information</span><br>
+                                        <small class="text-muted" th:if="${quotation.vehicle != null}" th:text="${quotation.vehicle.VIN}"></small>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="mb-3">
-                            <div class="row">
-                                <div class="col-6">
-                                    <strong>Created:</strong><br>
-                                    <span th:text="${#dates.format(quotation.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
-                                </div>
-                                <div class="col-6">
-                                    <strong>Price:</strong><br>
-                                    <span class="price-highlight" th:text="${'$' + #numbers.formatDecimal(quotation.totalPrice, 1, 2)}"></span>
+                            <div class="mb-3">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <strong>Created:</strong><br>
+                                        <span th:text="${#dates.format(quotation.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                                    </div>
+                                    <div class="col-6">
+                                        <strong>Price:</strong><br>
+                                        <span class="price-highlight" th:text="${'$' + #numbers.formatDecimal(quotation.totalPrice, 1, 2)}"></span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="action-buttons">
-                            <a th:href="@{/quotation/detail/{id}(id=${quotation.quotationID})}" 
-                               class="btn btn-outline-info btn-action">
-                                <i class="fas fa-eye me-1"></i>View Details
-                            </a>
-                            
-                            <div th:if="${quotation.status == 'Pending'}">
-                                <form th:action="@{/quotation/approve/{id}(id=${quotation.quotationID})}" 
-                                      method="post" style="display: inline;">
-                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                    <button type="submit" class="btn btn-success btn-action"
-                                            onclick="return confirm('Approve this quotation?')">
-                                        <i class="fas fa-check me-1"></i>Approve
-                                    </button>
-                                </form>
-                                
-                                <form th:action="@{/quotation/reject/{id}(id=${quotation.quotationID})}" 
-                                      method="post" style="display: inline;">
-                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                    <button type="submit" class="btn btn-danger btn-action"
-                                            onclick="return confirm('Reject this quotation?')">
-                                        <i class="fas fa-times me-1"></i>Reject
-                                    </button>
-                                </form>
-                            </div>
-                            
-                            <div th:if="${quotation.status == 'Accepted'}">
-                                <a th:href="@{/saleorder/new?quotationID={id}(id=${quotation.quotationID})}" 
-                                   class="btn btn-primary btn-action">
-                                    <i class="fas fa-shopping-cart me-1"></i>Create Order
+                            <div class="action-buttons">
+                                <a th:href="@{/quotation/detail/{id}(id=${quotation.quotationID})}"
+                                   class="btn btn-outline-info btn-action">
+                                    <i class="fas fa-eye me-1"></i>View Details
                                 </a>
+
+                                <div th:if="${quotation.status == 'Pending'}">
+                                    <form th:action="@{/quotation/approve/{id}(id=${quotation.quotationID})}"
+                                          method="post" style="display: inline;">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                        <button type="submit" class="btn btn-success btn-action"
+                                                onclick="return confirm('Approve this quotation?')">
+                                            <i class="fas fa-check me-1"></i>Approve
+                                        </button>
+                                    </form>
+
+                                    <form th:action="@{/quotation/reject/{id}(id=${quotation.quotationID})}"
+                                          method="post" style="display: inline;">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                        <button type="submit" class="btn btn-danger btn-action"
+                                                onclick="return confirm('Reject this quotation?')">
+                                            <i class="fas fa-times me-1"></i>Reject
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <div th:if="${quotation.status == 'Accepted'}">
+                                    <a th:href="@{/saleorder/new?quotationID={id}(id=${quotation.quotationID})}"
+                                       class="btn btn-primary btn-action">
+                                        <i class="fas fa-shopping-cart me-1"></i>Create Order
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- No Quotations Message -->
+            <div th:if="${quotations == null or quotations.empty}" class="text-center py-5">
+                <i class="fas fa-file-invoice-dollar fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No Quotations Found</h4>
+                <p class="text-muted">Create your first quotation to get started.</p>
+                <a href="/quotation/new" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Create New Quotation
+                </a>
+            </div>
+
         </div>
 
-        <!-- No Quotations Message -->
-        <div th:if="${quotations == null or quotations.empty}" class="text-center py-5">
-            <i class="fas fa-file-invoice-dollar fa-3x text-muted mb-3"></i>
-            <h4 class="text-muted">No Quotations Found</h4>
-            <p class="text-muted">Create your first quotation to get started.</p>
-            <a href="/quotation/new" class="btn btn-primary">
-                <i class="fas fa-plus me-2"></i>Create New Quotation
-            </a>
-        </div>
     </div>
 </div>
 
