@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 
 import com.dealermanagementsysstem.project.Model.*;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +41,19 @@ public class EVMVehicleController {
         }
 
         model.addAttribute("vehicles", vehicles);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+            String role = auth.getAuthorities().iterator().next().getAuthority();
+
+            if (role.equals("ROLE_EVM") || role.equals("ROLE_EVMSTAFF") || role.equals("ROLE_ADMIN")) {
+                model.addAttribute("actionRole", "EVM");
+            } else if (role.equals("ROLE_DEALER") || role.equals("ROLE_DEALERSTAFF")) {
+                model.addAttribute("actionRole", "DEALER");
+            }
+        }
+
         return "evmPage/vehicleList";
     }
 
@@ -54,6 +69,19 @@ public class EVMVehicleController {
             return "evmPage/vehicleList";
         }
         model.addAttribute("vehicle", vehicle);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getName())) {
+            String role = auth.getAuthorities().iterator().next().getAuthority();
+
+            if (role.equals("ROLE_EVM") || role.equals("ROLE_EVMSTAFF") || role.equals("ROLE_ADMIN")) {
+                model.addAttribute("actionRole", "EVM");
+            } else if (role.equals("ROLE_DEALER") || role.equals("ROLE_DEALERSTAFF")) {
+                model.addAttribute("actionRole", "DEALER");
+            }
+        }
+
         return "evmPage/vehicleListDetail";
     }
 

@@ -46,13 +46,15 @@
                 <button type="submit" class="btn btn-dark rounded-pill">Search</button>
             </form>
 
-            <a href="/evmCreateANewVehicleToList" style="text-decoration: none">
-                <button class="createNewVehicleButton">
+            <div th:if="${actionRole == 'EVM'}">
+                <a href="/evmCreateANewVehicleToList" style="text-decoration: none">
+                    <button class="createNewVehicleButton">
                     <span>
                         Create new vehicle
                     </span>
-                </button>
-            </a>
+                    </button>
+                </a>
+            </div>
 
         </div>
 

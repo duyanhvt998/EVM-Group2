@@ -112,12 +112,22 @@
                     <div class="actions-container">
                         <div class="title">Quick Actions</div>
                         <div class="button-group">
-                            <button class="rounded-btn">
-                                <i class="fas fa-edit"></i> Update
-                            </button>
-                            <button class="rounded-btn delete-btn">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
+
+                            <div th:if="${actionRole == 'EVM'}">
+                                <button class="rounded-btn">
+                                    <i class="fas fa-edit"></i> Update
+                                </button>
+                                <button class="rounded-btn delete-btn">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+
+                            <div th:if="${actionRole == 'DEALER'}">
+                                <button class="rounded-btn">
+                                    <i class="fas fa-edit"></i> Create Quotation
+                                </button>
+                            </div>
+
                         </div>
                     </div>
                 </div>
