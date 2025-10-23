@@ -1,10 +1,12 @@
 package com.dealermanagementsysstem.project.Model;
 
 import utils.DBUtils;
+
 import java.sql.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -16,11 +18,11 @@ public class DAOQuotation {
         System.out.println("🔍 [DEBUG] DAOQuotation.getVehicleByVIN called with VIN: " + vin);
 
         String sql = """
-            SELECT v.VIN, v.ManufactureYear, v.ColorID, vm.ModelName, vm.BasePrice
-            FROM Vehicle v
-            JOIN VehicleModel vm ON v.ModelID = vm.ModelID
-            WHERE v.VIN = ?
-        """;
+                    SELECT v.VIN, v.ManufactureYear, v.ColorID, vm.ModelName, vm.BasePrice
+                    FROM Vehicle v
+                    JOIN VehicleModel vm ON v.ModelID = vm.ModelID
+                    WHERE v.VIN = ?
+                """;
 
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -54,10 +56,10 @@ public class DAOQuotation {
         DTODealer dealer = null;
 
         String sql = """
-            SELECT DealerID, DealerName, Email, Phone, Address
-            FROM Dealer
-            WHERE DealerID = ?
-        """;
+                    SELECT DealerID, DealerName, Email, Phone, Address
+                    FROM Dealer
+                    WHERE DealerID = ?
+                """;
 
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -85,14 +87,14 @@ public class DAOQuotation {
     // 🔥 CORE FLOW STEP 1: Insert new quotation with price calculation
     public int insertQuotation(DTOQuotation quotation) {
         String insertQuotationSQL = """
-            INSERT INTO Quotation (CustomerID, StaffID, DealerID, CreatedAt, Status, LevelID)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """;
+                    INSERT INTO Quotation (CustomerID, StaffID, DealerID, CreatedAt, Status, LevelID)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """;
 
         String insertDetailSQL = """
-            INSERT INTO QuotationDetail (QuotationID, VIN, UnitPrice, Quantity, ColorID)
-            VALUES (?, ?, ?, ?, ?)
-        """;
+                    INSERT INTO QuotationDetail (QuotationID, VIN, UnitPrice, Quantity, ColorID)
+                    VALUES (?, ?, ?, ?, ?)
+                """;
 
         try (Connection conn = DBUtils.getConnection()) {
             conn.setAutoCommit(false);
@@ -100,8 +102,8 @@ public class DAOQuotation {
             try {
                 // 1. Calculate final price using the formula
                 BigDecimal finalPrice = calculateFinalPrice(
-                    quotation.getVehicle().getVIN(), 
-                    quotation.getDealer().getDealerID()
+                        quotation.getVehicle().getVIN(),
+                        quotation.getDealer().getDealerID()
                 );
 
                 // 2. Insert main Quotation
@@ -135,10 +137,10 @@ public class DAOQuotation {
                         psDetail.setBigDecimal(3, finalPrice);
                         psDetail.setInt(4, 1); // Default quantity
                         psDetail.setInt(5, quotation.getVehicle().getColorID());
-                        
+
                         System.out.println("🔍 [DEBUG] Inserting QuotationDetail with ColorID: " + quotation.getVehicle().getColorID());
                         psDetail.executeUpdate();
-                        
+
                         System.out.println("✅ QuotationDetail inserted with price: " + finalPrice);
                     }
 
@@ -164,20 +166,20 @@ public class DAOQuotation {
         DTOQuotation quotation = null;
 
         String sql = """
-            SELECT q.QuotationID, q.CreatedAt, q.Status, q.LevelID,
-                   c.CustomerID, c.FullName AS CustomerName, c.Email AS CustomerEmail, c.Phone AS CustomerPhone,
-                   d.DealerID, d.DealerName, d.Email AS DealerEmail, d.Phone AS DealerPhone,
-                   qd.VIN, qd.UnitPrice, qd.Quantity, qd.ColorID,
-                   vc.ColorName, vm.ModelName, vm.BasePrice, v.ManufactureYear
-            FROM Quotation q
-            JOIN Customer c ON q.CustomerID = c.CustomerID
-            JOIN Dealer d ON q.DealerID = d.DealerID
-            LEFT JOIN QuotationDetail qd ON q.QuotationID = qd.QuotationID
-            LEFT JOIN VehicleColor vc ON qd.ColorID = vc.ColorID
-            LEFT JOIN Vehicle v ON qd.VIN = v.VIN
-            LEFT JOIN VehicleModel vm ON v.ModelID = vm.ModelID
-            WHERE q.QuotationID = ?
-        """;
+                    SELECT q.QuotationID, q.CreatedAt, q.Status, q.LevelID,
+                           c.CustomerID, c.FullName AS CustomerName, c.Email AS CustomerEmail, c.Phone AS CustomerPhone,
+                           d.DealerID, d.DealerName, d.Email AS DealerEmail, d.Phone AS DealerPhone,
+                           qd.VIN, qd.UnitPrice, qd.Quantity, qd.ColorID,
+                           vc.ColorName, vm.ModelName, vm.BasePrice, v.ManufactureYear
+                    FROM Quotation q
+                    JOIN Customer c ON q.CustomerID = c.CustomerID
+                    JOIN Dealer d ON q.DealerID = d.DealerID
+                    LEFT JOIN QuotationDetail qd ON q.QuotationID = qd.QuotationID
+                    LEFT JOIN VehicleColor vc ON qd.ColorID = vc.ColorID
+                    LEFT JOIN Vehicle v ON qd.VIN = v.VIN
+                    LEFT JOIN VehicleModel vm ON v.ModelID = vm.ModelID
+                    WHERE q.QuotationID = ?
+                """;
 
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -233,19 +235,19 @@ public class DAOQuotation {
         List<DTOQuotation> quotations = new ArrayList<>();
 
         String sql = """
-            SELECT q.QuotationID, q.CreatedAt, q.Status, q.LevelID,
-                   c.CustomerID, c.FullName AS CustomerName, c.Email AS CustomerEmail, c.Phone AS CustomerPhone,
-                   d.DealerID, d.DealerName, d.Email AS DealerEmail, d.Phone AS DealerPhone,
-                   qd.VIN, qd.UnitPrice, qd.Quantity, vc.ColorName, vm.ModelName
-            FROM Quotation q
-            JOIN Customer c ON q.CustomerID = c.CustomerID
-            JOIN Dealer d ON q.DealerID = d.DealerID
-            LEFT JOIN QuotationDetail qd ON q.QuotationID = qd.QuotationID
-            LEFT JOIN VehicleColor vc ON qd.ColorID = vc.ColorID
-            LEFT JOIN Vehicle v ON qd.VIN = v.VIN
-            LEFT JOIN VehicleModel vm ON v.ModelID = vm.ModelID
-            ORDER BY q.CreatedAt DESC
-        """;
+                    SELECT q.QuotationID, q.CreatedAt, q.Status, q.LevelID,
+                           c.CustomerID, c.FullName AS CustomerName, c.Email AS CustomerEmail, c.Phone AS CustomerPhone,
+                           d.DealerID, d.DealerName, d.Email AS DealerEmail, d.Phone AS DealerPhone,
+                           qd.VIN, qd.UnitPrice, qd.Quantity, vc.ColorName, vm.ModelName
+                    FROM Quotation q
+                    JOIN Customer c ON q.CustomerID = c.CustomerID
+                    JOIN Dealer d ON q.DealerID = d.DealerID
+                    LEFT JOIN QuotationDetail qd ON q.QuotationID = qd.QuotationID
+                    LEFT JOIN VehicleColor vc ON qd.ColorID = vc.ColorID
+                    LEFT JOIN Vehicle v ON qd.VIN = v.VIN
+                    LEFT JOIN VehicleModel vm ON v.ModelID = vm.ModelID
+                    ORDER BY q.CreatedAt DESC
+                """;
 
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -286,13 +288,13 @@ public class DAOQuotation {
                 // Add price information if available
                 if (rs.getString("VIN") != null) {
                     DTOQuotation quotation = quotations.get(quotations.size() - 1);
-                    
+
                     // Calculate total price (UnitPrice * Quantity)
                     BigDecimal unitPrice = rs.getBigDecimal("UnitPrice");
                     int quantity = rs.getInt("Quantity");
                     double totalPrice = unitPrice.doubleValue() * quantity;
                     quotation.setTotalPrice(totalPrice);
-                    
+
                     // Set vehicle info
                     DTOVehicle vehicle = new DTOVehicle();
                     vehicle.setVIN(rs.getString("VIN"));
@@ -320,12 +322,12 @@ public class DAOQuotation {
 
             ps.setString(1, newStatus);
             ps.setInt(2, quotationID);
-            
+
             System.out.println("🔍 [DEBUG] Executing SQL: " + sql + " with parameters: [" + newStatus + ", " + quotationID + "]");
 
             int affectedRows = ps.executeUpdate();
             System.out.println("🔍 [DEBUG] SQL execution result: " + affectedRows + " rows affected");
-            
+
             if (affectedRows > 0) {
                 System.out.println("✅ Quotation status updated successfully: " + quotationID + " -> " + newStatus);
                 return true;
@@ -370,20 +372,20 @@ public class DAOQuotation {
         List<DTOQuotation> quotations = new ArrayList<>();
 
         String sql = """
-        SELECT q.QuotationID, q.CreatedAt, q.Status, q.LevelID,
-               c.CustomerID, c.FullName AS CustomerName, c.Email AS CustomerEmail, c.Phone AS CustomerPhone,
-               d.DealerID, d.DealerName, d.Email AS DealerEmail, d.Phone AS DealerPhone,
-               qd.VIN, qd.UnitPrice, qd.Quantity, vc.ColorName, vm.ModelName, vm.BasePrice, v.ManufactureYear
-        FROM Quotation q
-        JOIN Customer c ON q.CustomerID = c.CustomerID
-        JOIN Dealer d ON q.DealerID = d.DealerID
-        LEFT JOIN QuotationDetail qd ON q.QuotationID = qd.QuotationID
-        LEFT JOIN VehicleColor vc ON qd.ColorID = vc.ColorID
-        LEFT JOIN Vehicle v ON qd.VIN = v.VIN
-        LEFT JOIN VehicleModel vm ON v.ModelID = vm.ModelID
-        WHERE q.DealerID = ?
-        ORDER BY q.CreatedAt DESC
-    """;
+                    SELECT q.QuotationID, q.CreatedAt, q.Status, q.LevelID,
+                           c.CustomerID, c.FullName AS CustomerName, c.Email AS CustomerEmail, c.Phone AS CustomerPhone,
+                           d.DealerID, d.DealerName, d.Email AS DealerEmail, d.Phone AS DealerPhone,
+                           qd.VIN, qd.UnitPrice, qd.Quantity, vc.ColorName, vm.ModelName, vm.BasePrice, v.ManufactureYear
+                    FROM Quotation q
+                    JOIN Customer c ON q.CustomerID = c.CustomerID
+                    JOIN Dealer d ON q.DealerID = d.DealerID
+                    LEFT JOIN QuotationDetail qd ON q.QuotationID = qd.QuotationID
+                    LEFT JOIN VehicleColor vc ON qd.ColorID = vc.ColorID
+                    LEFT JOIN Vehicle v ON qd.VIN = v.VIN
+                    LEFT JOIN VehicleModel vm ON v.ModelID = vm.ModelID
+                    WHERE q.DealerID = ?
+                    ORDER BY q.CreatedAt DESC
+                """;
 
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -419,6 +421,9 @@ public class DAOQuotation {
                         dealer.setPhone(rs.getString("DealerPhone"));
                         quotation.setDealer(dealer);
 
+                        // ✅ Initialize quotationDetails list
+                        quotation.setQuotationDetails(new ArrayList<>());
+
                         quotations.add(quotation);
                         lastQuotationId = quotationId;
                     }
@@ -441,6 +446,24 @@ public class DAOQuotation {
                         vehicle.setManufactureYear(rs.getInt("ManufactureYear"));
                         vehicle.setBasePrice(rs.getBigDecimal("BasePrice"));
                         quotation.setVehicle(vehicle);
+
+                        // ✅ Add QuotationDetail to list
+                        DTOQuotationDetail detail = new DTOQuotationDetail();
+                        detail.setVIN(rs.getString("VIN"));
+                        detail.setUnitPrice(unitPrice);
+                        detail.setQuantity(quantity);
+                        detail.setColorName(rs.getString("ColorName"));
+                        detail.setModelName(rs.getString("ModelName"));
+                        quotation.getQuotationDetails().add(detail);
+                    } else {
+                        // ✅ If no QuotationDetail, create empty vehicle object
+                        DTOQuotation quotation = quotations.get(quotations.size() - 1);
+                        if (quotation.getVehicle() == null) {
+                            DTOVehicle emptyVehicle = new DTOVehicle();
+                            emptyVehicle.setVIN("N/A");
+                            emptyVehicle.setModelName("N/A");
+                            quotation.setVehicle(emptyVehicle);
+                        }
                     }
                 }
             }
@@ -455,17 +478,17 @@ public class DAOQuotation {
     // 🔥 PRICE CALCULATION: FinalPrice = BasePrice × (1 - ManufacturerDiscount) × (1 - DealerDiscount)
     public BigDecimal calculateFinalPrice(String vin, int dealerID) {
         String sql = """
-            SELECT vm.BasePrice,
-                   ISNULL(dlp.BaseDiscountPercent, 0) as BaseDiscountPercent,
-                   ISNULL(dlp.BonusDiscountPercent, 0) as BonusDiscountPercent,
-                   ISNULL(dpa.DiscountPercent, 0) as DealerDiscountPercent
-            FROM Vehicle v
-            JOIN VehicleModel vm ON v.ModelID = vm.ModelID
-            JOIN Dealer d ON d.DealerID = ?
-            LEFT JOIN DealerLevelPolicy dlp ON d.LevelID = dlp.LevelID
-            LEFT JOIN DealerPriceAdjustment dpa ON d.DealerID = dpa.DealerID AND v.ModelID = dpa.ModelID
-            WHERE v.VIN = ?
-        """;
+                    SELECT vm.BasePrice,
+                           ISNULL(dlp.BaseDiscountPercent, 0) as BaseDiscountPercent,
+                           ISNULL(dlp.BonusDiscountPercent, 0) as BonusDiscountPercent,
+                           ISNULL(dpa.DiscountPercent, 0) as DealerDiscountPercent
+                    FROM Vehicle v
+                    JOIN VehicleModel vm ON v.ModelID = vm.ModelID
+                    JOIN Dealer d ON d.DealerID = ?
+                    LEFT JOIN DealerLevelPolicy dlp ON d.LevelID = dlp.LevelID
+                    LEFT JOIN DealerPriceAdjustment dpa ON d.DealerID = dpa.DealerID AND v.ModelID = dpa.ModelID
+                    WHERE v.VIN = ?
+                """;
 
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -485,8 +508,8 @@ public class DAOQuotation {
 
                     // Apply formula: BasePrice × (1 - ManufacturerDiscount) × (1 - DealerDiscount)
                     BigDecimal finalPrice = basePrice
-                        .multiply(BigDecimal.ONE.subtract(manufacturerDiscount.divide(new BigDecimal(100))))
-                        .multiply(BigDecimal.ONE.subtract(dealerDiscount.divide(new BigDecimal(100))));
+                            .multiply(BigDecimal.ONE.subtract(manufacturerDiscount.divide(new BigDecimal(100))))
+                            .multiply(BigDecimal.ONE.subtract(dealerDiscount.divide(new BigDecimal(100))));
 
                     System.out.println("💰 Price calculation for VIN " + vin + ":");
                     System.out.println("   BasePrice: " + basePrice);
@@ -508,9 +531,9 @@ public class DAOQuotation {
     // 🔥 QUOTATION DETAIL MANAGEMENT: Insert QuotationDetail
     public boolean insertQuotationDetail(int quotationID, String vin, BigDecimal unitPrice, int quantity, int colorID) {
         String sql = """
-            INSERT INTO QuotationDetail (QuotationID, VIN, UnitPrice, Quantity, ColorID)
-            VALUES (?, ?, ?, ?, ?)
-        """;
+                    INSERT INTO QuotationDetail (QuotationID, VIN, UnitPrice, Quantity, ColorID)
+                    VALUES (?, ?, ?, ?, ?)
+                """;
 
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -542,14 +565,14 @@ public class DAOQuotation {
         List<DTOQuotationDetail> details = new ArrayList<>();
 
         String sql = """
-            SELECT qd.QuotationDetailID, qd.QuotationID, qd.VIN, qd.UnitPrice, qd.Quantity, qd.ColorID,
-                   vc.ColorName, vm.ModelName
-            FROM QuotationDetail qd
-            LEFT JOIN VehicleColor vc ON qd.ColorID = vc.ColorID
-            LEFT JOIN Vehicle v ON qd.VIN = v.VIN
-            LEFT JOIN VehicleModel vm ON v.ModelID = vm.ModelID
-            WHERE qd.QuotationID = ?
-        """;
+                    SELECT qd.QuotationDetailID, qd.QuotationID, qd.VIN, qd.UnitPrice, qd.Quantity, qd.ColorID,
+                           vc.ColorName, vm.ModelName
+                    FROM QuotationDetail qd
+                    LEFT JOIN VehicleColor vc ON qd.ColorID = vc.ColorID
+                    LEFT JOIN Vehicle v ON qd.VIN = v.VIN
+                    LEFT JOIN VehicleModel vm ON v.ModelID = vm.ModelID
+                    WHERE qd.QuotationID = ?
+                """;
 
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {

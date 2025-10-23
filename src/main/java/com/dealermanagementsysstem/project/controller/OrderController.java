@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -88,17 +89,12 @@ public class OrderController {
         }
 
         System.out.println(vin);
-        System.out.println(customerID);
-        System.out.println(staffID);
-        System.out.println(quotationID);
-        System.out.println(status);
 
         Integer dealerID = account.getDealerId();
 
         DAOQuotation quotationDAO = new DAOQuotation();
         DTOQuotation quotation = quotationDAO.getQuotationById(quotationID);
-        if (quotation == null || !"Accepted".equalsIgnoreCase(quotation.getStatus())) {
-            System.out.println(quotation.getStatus());
+        if (quotation == null || !"Approved".equalsIgnoreCase(quotation.getStatus())) {
             model.addAttribute("error", "Quotation không hợp lệ hoặc chưa được duyệt!");
             System.out.println("QUOTATION BI NULL");
             return "redirect:/quotation/list";
@@ -128,7 +124,13 @@ public class OrderController {
 
         DTOSaleOrderDetail detail = new DTOSaleOrderDetail();
         detail.setVehicle(vehicle);
-        detail.setPrice(quotation.getQuotationDetails().get(0).getUnitPrice());
+
+        // ✅ FIX: Kiểm tra null trước khi gọi get(0)
+        BigDecimal unitPrice = BigDecimal.ZERO;
+        if (quotation.getQuotationDetails() != null && !quotation.getQuotationDetails().isEmpty()) {
+            unitPrice = quotation.getQuotationDetails().get(0).getUnitPrice();
+        }
+        detail.setPrice(unitPrice);
         detail.setQuantity(1);
 
         List<DTOSaleOrderDetail> details = new ArrayList<>();
