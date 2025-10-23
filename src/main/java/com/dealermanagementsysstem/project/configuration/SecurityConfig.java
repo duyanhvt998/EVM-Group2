@@ -6,14 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.firewall.HttpFirewall;
@@ -142,7 +141,13 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(authz -> authz
                 // Public endpoints
-                .requestMatchers("/", "/login", "/success", "/test", "/health", "/api/test/**", "/css/**", "/js/**", "/images/**", "/static/**").permitAll()
+                .requestMatchers("/", "/login", "/success", "/test", "/health", "/api/test/**", "/css/**", "/js/**", "/images/**", "/static/**", "/scripts/**").permitAll()
+
+                // Public read-only access for vehicle browsing and quotation entry point
+                .requestMatchers(HttpMethod.GET, "/evm/vehicle/list", "/evm/vehicle/detail/**", "/evm/vehicle/showImage/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/quotation/new").permitAll()
+                .requestMatchers(HttpMethod.POST, "/quotation/save").permitAll()
+                .requestMatchers(HttpMethod.GET, "/quotation/preview/**").permitAll()
                 
                 // EVM/Admin role endpoints
                 .requestMatchers("/showEVMHomePage", "/evmVehicleList", "/evmCreateANewVehicleToList", 
@@ -154,6 +159,9 @@ public class SecurityConfig {
                                "/dealerCreateANewCustomer", "/dealerCustomerDetail", "/dealerVehiclesInformation",
                                "/getVehicleListToOrder", "/getVehicleListToCreateQuotation",
                                "/customer/**").hasAnyRole("DEALER", "DEALERSTAFF", "ADMIN")
+
+                // Quotation management (authenticated dealer/admin for actions beyond opening form)
+                .requestMatchers("/quotation/list", "/quotation/detail/**", "/quotation/approve/**", "/quotation/reject/**").hasAnyRole("DEALER", "DEALERSTAFF", "ADMIN")
                 
                 // All other requests require authentication
                 .anyRequest().authenticated()

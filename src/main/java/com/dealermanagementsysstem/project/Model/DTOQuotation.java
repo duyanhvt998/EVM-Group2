@@ -1,6 +1,7 @@
 package com.dealermanagementsysstem.project.Model;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 public class DTOQuotation {
     private int quotationID;
@@ -11,6 +12,7 @@ public class DTOQuotation {
     private String status;
     private DTODiscountPolicy discountPolicy;
     private double totalPrice;
+    private List<DTOQuotationDetail> quotationDetails;
 
     public DTOQuotation() {
     }
@@ -90,5 +92,13 @@ public class DTOQuotation {
 
     public void setTotalPrice(double totalPrice) {
         this.totalPrice = totalPrice;
+    }
+
+    public List<DTOQuotationDetail> getQuotationDetails() {
+        return quotationDetails;
+    }
+
+    public void setQuotationDetails(List<DTOQuotationDetail> quotationDetails) {
+        this.quotationDetails = quotationDetails;
     }
 }

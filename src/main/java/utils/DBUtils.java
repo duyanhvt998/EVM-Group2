@@ -21,9 +21,9 @@ import java.sql.SQLException;
  */
 public class DBUtils {
 
-    private static final String DEFAULT_DB_URL = "jdbc:sqlserver://localhost:1433;databaseName=CarDealerDBI;encrypt=true;trustServerCertificate=true";
+    private static final String DEFAULT_DB_URL = "jdbc:sqlserver://172.18.195.60:1433;databaseName=CarDealerDBI;encrypt=true;trustServerCertificate=true";
     private static final String DEFAULT_USER = "sa";
-    private static final String DEFAULT_PASS = "12345";
+    private static final String DEFAULT_PASS = "StrongPwd@123";
     public static Connection getConnection() {
         Connection conn = null;
         try {
@@ -31,20 +31,20 @@ public class DBUtils {
             String url = System.getProperty("db.url");
             String user = System.getProperty("db.username");
             String pass = System.getProperty("db.password");
-            if (url == null || url.isBlank()) {
+            if (url == null || url.trim().isEmpty()) {
                 url = System.getenv("SPRING_DATASOURCE_URL");
             }
-            if (user == null || user.isBlank()) {
+            if (user == null || user.trim().isEmpty()) {
                 user = System.getenv("SPRING_DATASOURCE_USERNAME");
             }
-            if (pass == null || pass.isBlank()) {
+            if (pass == null || pass.trim().isEmpty()) {
                 pass = System.getenv("SPRING_DATASOURCE_PASSWORD");
             }
 
             // 3) Last fallback to defaults
-            if (url == null || url.isBlank()) url = DEFAULT_DB_URL;
-            if (user == null || user.isBlank()) user = DEFAULT_USER;
-            if (pass == null || pass.isBlank()) pass = DEFAULT_PASS;
+            if (url == null || url.trim().isEmpty()) url = DEFAULT_DB_URL;
+            if (user == null || user.trim().isEmpty()) user = DEFAULT_USER;
+            if (pass == null || pass.trim().isEmpty()) pass = DEFAULT_PASS;
             conn = DriverManager.getConnection(url, user, pass);
         } catch (ClassNotFoundException e) {
             System.err.println("JDBC Driver not found: " + e.getMessage());
