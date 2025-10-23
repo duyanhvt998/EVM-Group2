@@ -67,6 +67,7 @@ public class OrderController {
             HttpSession session,
             Model model
     ) {
+        System.out.println();
         DTOAccount account = (DTOAccount) session.getAttribute("user");
         if (account == null) {
             model.addAttribute("error", "Bạn cần đăng nhập để tạo đơn hàng!");

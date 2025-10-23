@@ -369,7 +369,6 @@
 
                                 <div th:if="${quotation.status == 'Accepted'}">
 
-                                    <h1 th:text="${quotation.vehicle.VIN}"></h1>
                                     <form th:action="@{/saleorder/insert}" method="post" style="display:inline;">
                                         <input type="hidden" name="quotationID" th:value="${quotation.quotationID}" />
                                         <input type="hidden" name="customerID" th:value="${quotation.customer.customerID}" />
