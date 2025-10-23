@@ -225,4 +225,41 @@ public class DAOPurchaseOrder {
         }
         return -1;
     }
+    // 🔹 Lấy danh sách đơn hàng theo DealerID
+    public List<DTOPurchaseOrder> getPurchaseOrdersByDealerId(int dealerId) {
+        List<DTOPurchaseOrder> list = new ArrayList<>();
+        String sql = """
+            SELECT po.PurchaseOrderID, po.DealerID, po.StaffID, po.CreatedAt, po.Status,
+                   d.DealerName, ds.FullName AS StaffName
+            FROM PurchaseOrder po
+            LEFT JOIN Dealer d ON po.DealerID = d.DealerID
+            LEFT JOIN DealerStaff ds ON po.StaffID = ds.StaffID
+            WHERE po.DealerID = ?
+            ORDER BY po.PurchaseOrderID DESC
+            """;
+
+        try (Connection conn = DBUtils.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, dealerId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    DTOPurchaseOrder dto = new DTOPurchaseOrder();
+                    dto.setPurchaseOrderId(rs.getInt("PurchaseOrderID"));
+                    dto.setDealerId(rs.getInt("DealerID"));
+                    dto.setStaffId(rs.getInt("StaffID"));
+                    dto.setDealerName(rs.getString("DealerName"));
+                    dto.setStaffName(rs.getString("StaffName"));
+                    dto.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                    dto.setStatus(rs.getString("Status"));
+                    list.add(dto);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
 }
