@@ -2,6 +2,8 @@ package com.dealermanagementsysstem.project.controller;
 
 import com.dealermanagementsysstem.project.Model.*;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +34,14 @@ public class OrderController {
     // ======================================================
     @GetMapping("/new")
     public String showCreateForm(Model model, HttpSession session) {
-        DTOAccount account = (DTOAccount) session.getAttribute("user");
+
+        // ✅ Lấy user từ Spring Security
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+
+        DAOAccount daoAccount = new DAOAccount();
+        DTOAccount account = daoAccount.findAccountByEmail(email);
+
         if (account == null || account.getDealerId() == null) {
             model.addAttribute("error", "Bạn cần đăng nhập bằng tài khoản dealer!");
             return "redirect:/login";
@@ -64,20 +73,21 @@ public class OrderController {
             @RequestParam("vin") String vin,
             @RequestParam("quotationID") int quotationID,
             @RequestParam(value = "status", required = false, defaultValue = "Pending") String status,
-            HttpSession session,
             Model model
     ) {
-        DTOAccount account = (DTOAccount) session.getAttribute("user");
-        if (account == null) {
-            model.addAttribute("error", "Bạn cần đăng nhập để tạo đơn hàng!");
+        // ✅ Lấy user từ Spring Security
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+
+        DAOAccount daoAccount = new DAOAccount();
+        DTOAccount account = daoAccount.findAccountByEmail(email);
+
+        if (account == null || account.getDealerId() == null) {
+            model.addAttribute("error", "Tài khoản hiện tại không hợp lệ hoặc chưa đăng nhập!");
             return "redirect:/login";
         }
 
         Integer dealerID = account.getDealerId();
-        if (dealerID == null) {
-            model.addAttribute("error", "Tài khoản hiện tại không hợp lệ!");
-            return "redirect:/saleorder";
-        }
 
         DAOQuotation quotationDAO = new DAOQuotation();
         DTOQuotation quotation = quotationDAO.getQuotationById(quotationID);
