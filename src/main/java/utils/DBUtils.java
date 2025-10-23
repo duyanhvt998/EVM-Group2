@@ -1,60 +1,73 @@
 package utils;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 /**
- * DBUtils - reads connection info from System properties (which Spring Boot sets from application.properties)
- * Fallback: uses embedded defaults (localhost, CarDealerDBI, sa, 12345) for convenience.
- *
- * To override: set -Ddb.url=... -Ddb.username=... -Ddb.password=...
- * Spring Boot's application.properties already sets spring.datasource.* so when running via Spring Boot, set JVM props in
- * src/main/resources/application.properties by adding:
- *   spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=CarDealerDBI;trustServerCertificate=true
- *   spring.datasource.username=sa
- *   spring.datasource.password=12345
- *
- * This class will try to use System.getProperty("db.url"), if not present will fall back to spring.datasource.url env var,
- * then to defaults.
+ * DBUtils - đọc thông tin kết nối từ System properties hoặc environment variables.
+ * Fallback: dùng mặc định localhost, CarDealerDBI, sa, 12345.
  */
 public class DBUtils {
 
     private static final String DEFAULT_DB_URL = "jdbc:sqlserver://localhost:1433;databaseName=CarDealerDBI;encrypt=true;trustServerCertificate=true";
     private static final String DEFAULT_USER = "sa";
     private static final String DEFAULT_PASS = "12345";
+
+    // ======================================================
+    // GET CONNECTION
+    // ======================================================
     public static Connection getConnection() {
         Connection conn = null;
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+
             String url = System.getProperty("db.url");
             String user = System.getProperty("db.username");
             String pass = System.getProperty("db.password");
-            if (url == null || url.trim().isEmpty()) {
-                url = System.getenv("SPRING_DATASOURCE_URL");
-            }
-            if (user == null || user.trim().isEmpty()) {
-                user = System.getenv("SPRING_DATASOURCE_USERNAME");
-            }
-            if (pass == null || pass.trim().isEmpty()) {
-                pass = System.getenv("SPRING_DATASOURCE_PASSWORD");
-            }
 
-            // 3) Last fallback to defaults
+            if (url == null || url.trim().isEmpty()) url = System.getenv("SPRING_DATASOURCE_URL");
+            if (user == null || user.trim().isEmpty()) user = System.getenv("SPRING_DATASOURCE_USERNAME");
+            if (pass == null || pass.trim().isEmpty()) pass = System.getenv("SPRING_DATASOURCE_PASSWORD");
+
             if (url == null || url.trim().isEmpty()) url = DEFAULT_DB_URL;
             if (user == null || user.trim().isEmpty()) user = DEFAULT_USER;
             if (pass == null || pass.trim().isEmpty()) pass = DEFAULT_PASS;
+
             conn = DriverManager.getConnection(url, user, pass);
+
         } catch (ClassNotFoundException e) {
-            System.err.println("JDBC Driver not found: " + e.getMessage());
+            System.err.println("❌ JDBC Driver not found: " + e.getMessage());
         } catch (SQLException e) {
-            System.err.println("Fail connecting to DB: " + e.getMessage());
+            System.err.println("❌ Failed to connect to DB: " + e.getMessage());
         }
         return conn;
     }
+
+    // ======================================================
+    // CREATE PREPARED STATEMENT
+    // ======================================================
     public static PreparedStatement createPreparedStatement(String sql) throws SQLException {
         Connection conn = getConnection();
         return conn.prepareStatement(sql);
+    }
+
+    // ======================================================
+    // CLOSE UTILITIES
+    // ======================================================
+    public static void closeQuietly(ResultSet rs) {
+        if (rs != null) {
+            try { rs.close(); } catch (SQLException ignored) {}
+        }
+    }
+
+    public static void closeQuietly(Statement st) {
+        if (st != null) {
+            try { st.close(); } catch (SQLException ignored) {}
+        }
+    }
+
+    public static void closeQuietly(Connection conn) {
+        if (conn != null) {
+            try { conn.close(); } catch (SQLException ignored) {}
+        }
     }
 }
