@@ -23,7 +23,7 @@ public class OrderController {
         this.dao = new DAOSaleOrder();
     }
 
-    // ✅ Hiển thị danh sách tất cả đơn hàng
+    //  Hiển thị danh sách tất cả đơn hàng
     @GetMapping
     public String listSaleOrders(Model model) {
         List<DTOSaleOrder> orders = dao.getAllSaleOrders();
@@ -31,7 +31,7 @@ public class OrderController {
         return "dealerPage/customerOrderList"; // 👉 trang Thymeleaf hiển thị danh sách
     }
 
-    // 🔥 CORE FLOW: Show create order form with approved quotations
+    //  Hiển thị form tạo đơn hàng mới
     @GetMapping("/new")
     public String showCreateForm(Model model, HttpSession session) {
         System.out.println("📋 [DEBUG] Loading create order form with approved quotations");
@@ -72,7 +72,7 @@ public class OrderController {
         }
     }
 
-    // 🔥 CORE FLOW: Create SaleOrder with mandatory quotation validation
+    //  Xử lý khi submit form tạo đơn hàng
     @PostMapping("/insert")
     public String insertSaleOrder(
             @RequestParam("customerID") int customerID,
@@ -85,7 +85,7 @@ public class OrderController {
     ) {
         System.out.println("🧩 [DEBUG] Creating SaleOrder for CustomerID: " + customerID + ", VIN: " + vin + ", QuotationID: " + quotationID);
 
-        // ✅ Lấy dealerID từ tài khoản đang đăng nhập
+        //  Lấy dealerID từ tài khoản đang đăng nhập
         DTOAccount account = (DTOAccount) session.getAttribute("user");
         if (account == null) {
             System.out.println("⚠️ [ERROR] Không tìm thấy tài khoản trong session. Người dùng chưa đăng nhập!");
@@ -181,13 +181,13 @@ public class OrderController {
             model.addAttribute("message", "Sale order created successfully from approved quotation!");
             return "redirect:/saleorder";
         } else {
-            System.out.println("❌ [FAILED] Failed to create SaleOrder for DealerID: " + dealerID + ", VIN: " + vin);
+            System.out.println(" [FAILED] Failed to create SaleOrder for DealerID: " + dealerID + ", VIN: " + vin);
             model.addAttribute("error", "Failed to create sale order. Please check input data!");
             return "dealerPage/createSaleOrder";
         }
     }
 
-    // ✅ Chi tiết 1 đơn hàng
+    //  Chi tiết 1 đơn hàng
     @GetMapping("/detail/{id}")
     public String viewOrderDetail(@PathVariable("id") int id, Model model) {
         List<DTOSaleOrder> list = dao.getAllSaleOrders();

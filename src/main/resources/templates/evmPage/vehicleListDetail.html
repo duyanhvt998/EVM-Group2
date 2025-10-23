@@ -98,6 +98,29 @@
                 </div>
 
                 <div class="right-column">
+
+                    <div class="actions-container">
+                        <div class="title">Quick Actions</div>
+                        <div class="button-group">
+
+                            <div th:if="${actionRole == 'EVM'}">
+                                <button class="rounded-btn">
+                                    <i class="fas fa-edit"></i> Update
+                                </button>
+                                <button class="rounded-btn delete-btn">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+
+                            <div th:if="${actionRole == 'DEALER'}">
+                                <button class="rounded-btn">
+                                    <i class="fas fa-edit"></i> Create Quotation
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+
                     <div class="image-container">
                         <img th:if="${vehicle.model.modelImage != null}"
                              th:src="@{/evm/vehicle/showImage/{vin}(vin=${vehicle.VIN})}"

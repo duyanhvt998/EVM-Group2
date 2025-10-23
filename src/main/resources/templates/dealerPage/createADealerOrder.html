@@ -29,7 +29,7 @@
             <h2>This is a navigation link.</h2>
         </div>
 
-        <div class="d-flex">
+        <div class="d-flex wrap">
 
             <span>
                 <h1>Create a new customer</h1>
@@ -40,6 +40,7 @@
         <div class="d-flex create-vehicle-form-container">
 
             <form action="/customer/insert" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <div class="create-vehicle-form-row">
                     <label>Full name</label>
                     <input name="FullName" type="text" class="create-vehicle-form-input mb-1" required>

@@ -27,10 +27,10 @@
     <div class="mainContent flex-grow-1 p-3" style="overflow: hidden">
 
         <div class="d-flex">
-            <h2>This is a navigation link.</h2>
+            <h2>THIS IS A DEALER LINK.</h2>
         </div>
 
-        <div class="d-flex">
+        <div class="d-flex wrap">
 
             <span>
                 <h1>Dealer Inventory</h1>
@@ -52,425 +52,35 @@
 
             <div class="scroll-box">
                 <div class="items-container">
-                    <!-- Item 1 -->
-                    <button class="item-button">
-                        <div class="image-placeholder">🚗</div>
-                        <div class="item-info">
-                            <div class="model-name">Tesla Model 3</div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Manufacturer</span>
-                                    <span class="info-value">Tesla Inc.</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Year</span>
-                                    <span class="info-value">2023</span>
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">VIN</span>
-                                    <span class="info-value">5YJ3E1EA8LF123456</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Mileage</span>
-                                    <span class="info-value">12,450 km</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
 
-                    <!-- Item 2 -->
-                    <button class="item-button">
-                        <div class="image-placeholder">🏎️</div>
-                        <div class="item-info">
-                            <div class="model-name">BMW M440i</div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Manufacturer</span>
-                                    <span class="info-value">BMW</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Year</span>
-                                    <span class="info-value">2022</span>
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">VIN</span>
-                                    <span class="info-value">WBAFN3C55ND123456</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Mileage</span>
-                                    <span class="info-value">28,350 km</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
+                    <div th:each="vehicle : ${vehicles}">
 
-                    <!-- Item 3 -->
-                    <button class="item-button">
-                        <div class="image-placeholder">🚙</div>
-                        <div class="item-info">
-                            <div class="model-name">Honda CR-V</div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Manufacturer</span>
-                                    <span class="info-value">Honda</span>
+                        <!-- Item  -->
+                        <button class="item-button">
+                            <div class="image-placeholder">🚗</div>
+                            <div class="item-info">
+                                <div class="model-name" th:text="${vehicle.vin}"></div>
+                                <div class="info-row">
+                                    <div class="info-item">
+                                        <span class="info-label">Received date:</span>
+                                        <span class="info-value" th:text="${vehicle.receivedDate}"></span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Status:</span>
+                                        <span class="info-value" th:text="${vehicle.status}"></span>
+                                    </div>
                                 </div>
-                                <div class="info-item">
-                                    <span class="info-label">Year</span>
-                                    <span class="info-value">2021</span>
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">VIN</span>
-                                    <span class="info-value">2HRCF8H74MH123456</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Mileage</span>
-                                    <span class="info-value">45,200 km</span>
+                                <div class="info-row">
+                                    <div class="info-item">
+                                        <span class="info-label">Amount:</span>
+                                        <span class="info-value" th:text="${vehicle.amount}"></span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </button>
+                        </button>
 
-                    <!-- Item 4 -->
-                    <button class="item-button">
-                        <div class="image-placeholder">🚗</div>
-                        <div class="item-info">
-                            <div class="model-name">Ford Mustang</div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Manufacturer</span>
-                                    <span class="info-value">Ford</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Year</span>
-                                    <span class="info-value">2023</span>
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">VIN</span>
-                                    <span class="info-value">1FA6P8TH6M5123456</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Mileage</span>
-                                    <span class="info-value">8,900 km</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
+                    </div>
 
-                    <!-- Item 5 -->
-                    <button class="item-button">
-                        <div class="image-placeholder">🏎️</div>
-                        <div class="item-info">
-                            <div class="model-name">Porsche 911</div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Manufacturer</span>
-                                    <span class="info-value">Porsche</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Year</span>
-                                    <span class="info-value">2022</span>
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">VIN</span>
-                                    <span class="info-value">WP0CA29962S123456</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Mileage</span>
-                                    <span class="info-value">15,600 km</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
-
-                    <!-- Item 6 -->
-                    <button class="item-button">
-                        <div class="image-placeholder">🚙</div>
-                        <div class="item-info">
-                            <div class="model-name">Toyota Highlander</div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Manufacturer</span>
-                                    <span class="info-value">Toyota</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Year</span>
-                                    <span class="info-value">2020</span>
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">VIN</span>
-                                    <span class="info-value">5TDGK2H26MS123456</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Mileage</span>
-                                    <span class="info-value">52,100 km</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
-
-                    <!-- Item 7 -->
-                    <button class="item-button">
-                        <div class="image-placeholder">🚗</div>
-                        <div class="item-info">
-                            <div class="model-name">Audi A4</div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Manufacturer</span>
-                                    <span class="info-value">Audi</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Year</span>
-                                    <span class="info-value">2023</span>
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">VIN</span>
-                                    <span class="info-value">WAUEF8C06N1234567</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Mileage</span>
-                                    <span class="info-value">5,340 km</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
-
-                    <!-- Item 8 -->
-                    <button class="item-button">
-                        <div class="image-placeholder">🏎️</div>
-                        <div class="item-info">
-                            <div class="model-name">Mercedes-Benz C63</div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Manufacturer</span>
-                                    <span class="info-value">Mercedes</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Year</span>
-                                    <span class="info-value">2022</span>
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">VIN</span>
-                                    <span class="info-value">WDDWJ8CB3MF123456</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Mileage</span>
-                                    <span class="info-value">19,870 km</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
-
-                    <!-- Item 9 -->
-                    <button class="item-button">
-                        <div class="image-placeholder">🚙</div>
-                        <div class="item-info">
-                            <div class="model-name">Chevrolet Tahoe</div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Manufacturer</span>
-                                    <span class="info-value">Chevrolet</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Year</span>
-                                    <span class="info-value">2021</span>
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">VIN</span>
-                                    <span class="info-value">3GTUR2J43LG123456</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Mileage</span>
-                                    <span class="info-value">38,200 km</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
-
-                    <!-- Item 10 -->
-                    <button class="item-button">
-                        <div class="image-placeholder">🚗</div>
-                        <div class="item-info">
-                            <div class="model-name">Mazda CX-5</div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Manufacturer</span>
-                                    <span class="info-value">Mazda</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Year</span>
-                                    <span class="info-value">2022</span>
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">VIN</span>
-                                    <span class="info-value">JM2BL2SA7C0123456</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Mileage</span>
-                                    <span class="info-value">22,150 km</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
-
-                    <!-- Item 11 -->
-                    <button class="item-button">
-                        <div class="image-placeholder">🏎️</div>
-                        <div class="item-info">
-                            <div class="model-name">Lamborghini Huracán</div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Manufacturer</span>
-                                    <span class="info-value">Lamborghini</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Year</span>
-                                    <span class="info-value">2023</span>
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">VIN</span>
-                                    <span class="info-value">ZHWEE9ZZ4M0123456</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Mileage</span>
-                                    <span class="info-value">3,200 km</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
-
-                    <!-- Item 12 -->
-                    <button class="item-button">
-                        <div class="image-placeholder">🚙</div>
-                        <div class="item-info">
-                            <div class="model-name">Hyundai Santa Fe</div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Manufacturer</span>
-                                    <span class="info-value">Hyundai</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Year</span>
-                                    <span class="info-value">2021</span>
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">VIN</span>
-                                    <span class="info-value">KM8S34AB5LU123456</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Mileage</span>
-                                    <span class="info-value">41,560 km</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
-
-                    <!-- Item 13 -->
-                    <button class="item-button">
-                        <div class="image-placeholder">🚗</div>
-                        <div class="item-info">
-                            <div class="model-name">Volkswagen Golf</div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Manufacturer</span>
-                                    <span class="info-value">Volkswagen</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Year</span>
-                                    <span class="info-value">2022</span>
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">VIN</span>
-                                    <span class="info-value">WVWZZ3CB3MW123456</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Mileage</span>
-                                    <span class="info-value">16,780 km</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
-
-                    <!-- Item 14 -->
-                    <button class="item-button">
-                        <div class="image-placeholder">🏎️</div>
-                        <div class="item-info">
-                            <div class="model-name">Ferrari F8 Tributo</div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Manufacturer</span>
-                                    <span class="info-value">Ferrari</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Year</span>
-                                    <span class="info-value">2023</span>
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">VIN</span>
-                                    <span class="info-value">ZFF6T0AJ7M0123456</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Mileage</span>
-                                    <span class="info-value">980 km</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
-
-                    <!-- Item 15 -->
-                    <button class="item-button">
-                        <div class="image-placeholder">🚙</div>
-                        <div class="item-info">
-                            <div class="model-name">Kia Sorento</div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Manufacturer</span>
-                                    <span class="info-value">Kia</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Year</span>
-                                    <span class="info-value">2022</span>
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">VIN</span>
-                                    <span class="info-value">KNDPM3AC8N7123456</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Mileage</span>
-                                    <span class="info-value">29,340 km</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
                 </div>
             </div>
 
