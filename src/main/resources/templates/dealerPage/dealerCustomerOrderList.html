@@ -53,130 +53,37 @@
             <div class="scroll-box">
                 <div class="items-container">
 
-                    <div th:each="vehicle : ${vehicles}">
+                    <div th:each="order : ${orders}">
+
                         <!-- Item  -->
-                        <button class="item-button">
-                            <div class="image-placeholder">🚗</div>
-                            <div class="item-info">
-                                <div class="model-name" th:text="${vehicle.vin}"></div>
-                                <div class="info-row">
-                                    <div class="info-item">
-                                        <span class="info-label">Received date:</span>
-                                        <span class="info-value" th:text="${vehicle.receivedDate}"></span>
+                        <a href="/dealerShowCustomerOrderDetailTest" style="text-decoration: none;">
+                            <button class="item-button">
+                                <div class="image-placeholder">🚗</div>
+                                <div class="item-info">
+                                    <div class="model-name">
+                                        Order ID: <span th:text="${order.orderID}"></span>
                                     </div>
-                                    <div class="info-item">
-                                        <span class="info-label">Status:</span>
-                                        <span class="info-value" th:text="${vehicle.status}"></span>
+                                    <div class="info-row">
+                                        <div class="info-item">
+                                            <span class="info-label">Created date:</span>
+                                            <span class="info-value" th:text="${order.orderDate}"></span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Quantity:</span>
+                                            <span class="info-value" th:text="${order.totalAmount}"></span>
+                                        </div>
+                                    </div>
+                                    <div class="info-row">
+                                        <div class="info-item">
+                                            <span class="info-label">Status:</span>
+                                            <span class="info-value" th:text="${order.status}"></span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="info-row">
-                                    <div class="info-item">
-                                        <span class="info-label">Amount:</span>
-                                        <span class="info-value" th:text="${vehicle.amount}"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </button>
+                            </button>
+                        </a>
 
                     </div>
-
-                    <!-- Item  -->
-                    <a href="/dealerShowCustomerOrderDetailTest">
-                        <button class="item-button">
-                            <div class="image-placeholder">🚗</div>
-                            <div class="item-info">
-                                <div class="model-name"> Customer order 1 </div>
-                                <div class="info-row">
-                                    <div class="info-item">
-                                        <span class="info-label">Received date:</span>
-                                        <span class="info-value"></span>
-                                    </div>
-                                    <div class="info-item">
-                                        <span class="info-label">Status:</span>
-                                        <span class="info-value"></span>
-                                    </div>
-                                </div>
-                                <div class="info-row">
-                                    <div class="info-item">
-                                        <span class="info-label">Amount:</span>
-                                        <span class="info-value"</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </button>
-                    </a>
-
-                    <!-- Item  -->
-                    <button class="item-button">
-                        <div class="image-placeholder">🚗</div>
-                        <div class="item-info">
-                            <div class="model-name"> Customer order 1 </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Received date:</span>
-                                    <span class="info-value"></span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Status:</span>
-                                    <span class="info-value"></span>
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Amount:</span>
-                                    <span class="info-value"</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
-
-                    <!-- Item  -->
-                    <button class="item-button">
-                        <div class="image-placeholder">🚗</div>
-                        <div class="item-info">
-                            <div class="model-name"> Customer order 1 </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Received date:</span>
-                                    <span class="info-value"></span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Status:</span>
-                                    <span class="info-value"></span>
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Amount:</span>
-                                    <span class="info-value"</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
-
-                    <!-- Item  -->
-                    <button class="item-button">
-                        <div class="image-placeholder">🚗</div>
-                        <div class="item-info">
-                            <div class="model-name"> Customer order 1 </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Received date:</span>
-                                    <span class="info-value"></span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">Status:</span>
-                                    <span class="info-value"></span>
-                                </div>
-                            </div>
-                            <div class="info-row">
-                                <div class="info-item">
-                                    <span class="info-label">Amount:</span>
-                                    <span class="info-value"</span>
-                                </div>
-                            </div>
-                        </div>
-                    </button>
 
                 </div>
             </div>

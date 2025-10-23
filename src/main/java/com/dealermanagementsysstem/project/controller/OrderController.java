@@ -35,7 +35,7 @@ public class OrderController {
     public String listSaleOrders(Model model) {
         List<DTOSaleOrder> orders = daoSaleOrder.getAllSaleOrders();
         model.addAttribute("orders", orders);
-        return "dealerPage/customerOrderList";
+        return "dealerPage/dealerCustomerOrderList";
     }
 
     // ======================================================
@@ -87,9 +87,11 @@ public class OrderController {
             HttpSession session,
             Model model
     ) {
+        System.out.println(vin);
         DTOAccount account = (DTOAccount) session.getAttribute("user");
         if (account == null) {
             model.addAttribute("error", "Bạn cần đăng nhập để tạo đơn hàng!");
+            System.out.println("Noaccount found");
             return "redirect:/login";
         }
 
