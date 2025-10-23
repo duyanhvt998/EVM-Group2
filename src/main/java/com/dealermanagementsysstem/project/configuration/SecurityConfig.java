@@ -137,7 +137,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/test", "/health", "/api/test/**") // Allow these endpoints without CSRF
+                .ignoringRequestMatchers("/test", "/health", "/api/test/**", "/evm/vehicle/create") // Allow these endpoints without CSRF
             )
             .authorizeHttpRequests(authz -> authz
                 // Public endpoints
@@ -153,6 +153,10 @@ public class SecurityConfig {
                 .requestMatchers("/showEVMHomePage", "/evmVehicleList", "/evmCreateANewVehicleToList", 
                                "/evmOrderList", "/evmOrderHistory", "/vehicleDistributionManagement",
                                "/getVehicleList").hasAnyRole("ADMIN", "EVM", "EVMSTAFF")
+                
+                // EVM Vehicle management endpoints
+                .requestMatchers(HttpMethod.GET, "/evm/vehicle/create").hasAnyRole("ADMIN", "EVM", "EVMSTAFF")
+                .requestMatchers("/evm/vehicle/create", "/evm/vehicle/edit/**", "/evm/vehicle/delete/**").hasAnyRole("ADMIN", "EVM", "EVMSTAFF")
                 
                 // Dealer role endpoints  
                 .requestMatchers("/showDealerHomePage", "/dealerCustomerManagement", "/dealerCustomerList",
