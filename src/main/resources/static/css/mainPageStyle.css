@@ -313,6 +313,14 @@
     height: 40px;
 }
 
+.wrap{
+    display: flex;           /* Đảm bảo là flex container */
+    flex-wrap: wrap;         /* ✅ Cho phép xuống hàng */
+    justify-content: center; /* (tùy chọn) canh giữa các phần tử */
+    align-items: center;     /* (tùy chọn) canh giữa theo chiều dọc */
+    gap: 20px;
+}
+
 /* RESPONSIVE */
 /* Tablet */
 @media (max-width: 1024px) {
@@ -352,10 +360,15 @@
     .d-flex.flex-wrap{
         flex-direction: column;
         align-items: center;
+
     }
 
     .d-flex{
         justify-content: center;
+        flex-direction: column;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
 
 
