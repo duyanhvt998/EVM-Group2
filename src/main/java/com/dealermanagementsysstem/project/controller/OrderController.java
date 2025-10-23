@@ -88,12 +88,17 @@ public class OrderController {
         }
 
         System.out.println(vin);
+        System.out.println(customerID);
+        System.out.println(staffID);
+        System.out.println(quotationID);
+        System.out.println(status);
 
         Integer dealerID = account.getDealerId();
 
         DAOQuotation quotationDAO = new DAOQuotation();
         DTOQuotation quotation = quotationDAO.getQuotationById(quotationID);
-        if (quotation == null || !"Approved".equalsIgnoreCase(quotation.getStatus())) {
+        if (quotation == null || !"Accepted".equalsIgnoreCase(quotation.getStatus())) {
+            System.out.println(quotation.getStatus());
             model.addAttribute("error", "Quotation không hợp lệ hoặc chưa được duyệt!");
             System.out.println("QUOTATION BI NULL");
             return "redirect:/quotation/list";
