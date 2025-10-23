@@ -641,8 +641,8 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Custom Discount %:</label>
-                                    <input type="number" name="customDiscount" class="form-control" min="0" max="50"
-                                           step="0.1" placeholder="0.0" id="customDiscount">
+                     <input type="number" name="extraDiscount" class="form-control" min="0" max="50"
+                         step="0.1" placeholder="0.0" id="customDiscount">
                                     <small class="form-text text-muted">Enter custom discount percentage (0-50%)</small>
                                 </div>
                             </div>
@@ -741,7 +741,7 @@
 
     function updatePriceCalculation() {
         const discountSelect = document.getElementById('promotionSelect');
-        const customDiscount = parseFloat(document.getElementById('customDiscount').value) || 0;
+    const customDiscount = parseFloat(document.getElementById('customDiscount').value) || 0;
 
         // Get discount from promotion or custom
         if (discountSelect.value) {
@@ -781,6 +781,9 @@
         } else {
             discountInfo.style.display = 'none';
         }
+
+        // sync hidden field (already using extraDiscount name on input itself)
+        // if needed additional logic could be added here (e.g., cap value)
     }
 
     // Event listeners

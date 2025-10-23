@@ -49,10 +49,13 @@ public class OrderController {
         }
 
         DAOQuotation quotationDAO = new DAOQuotation();
-        List<DTOQuotation> approvedQuotations = quotationDAO.getQuotationsByDealer(account.getDealerId())
-                .stream()
-                .filter(q -> "Approved".equalsIgnoreCase(q.getStatus()))
-                .toList();
+    List<DTOQuotation> approvedQuotations = quotationDAO.getQuotationsByDealer(account.getDealerId())
+        .stream()
+        .filter(q -> {
+            String s = q.getStatus();
+            return s != null && (s.equalsIgnoreCase("Approved") || s.equalsIgnoreCase("Accepted"));
+        })
+        .toList();
 
         if (approvedQuotations.isEmpty()) {
             model.addAttribute("error", "Không có quotation nào được duyệt!");
@@ -88,15 +91,14 @@ public class OrderController {
             return "redirect:/login";
         }
 
-        System.out.println(vin);
+    // Debug removed: vin available via param if needed for logging framework
 
         Integer dealerID = account.getDealerId();
 
         DAOQuotation quotationDAO = new DAOQuotation();
         DTOQuotation quotation = quotationDAO.getQuotationById(quotationID);
-        if (quotation == null || !"Approved".equalsIgnoreCase(quotation.getStatus())) {
+        if (quotation == null || !("Approved".equalsIgnoreCase(quotation.getStatus()) || "Accepted".equalsIgnoreCase(quotation.getStatus()))) {
             model.addAttribute("error", "Quotation không hợp lệ hoặc chưa được duyệt!");
-            System.out.println("QUOTATION BI NULL");
             return "redirect:/quotation/list";
         }
 
@@ -141,12 +143,10 @@ public class OrderController {
         boolean success = dao.createSaleOrder(order);
 
         if (success) {
-            System.out.println("Success");
             model.addAttribute("message", "Tạo đơn hàng thành công!");
             return "redirect:/saleorder";
         } else {
             model.addAttribute("error", "Không thể tạo đơn hàng, vui lòng thử lại.");
-            System.out.println("Success");
             return "dealerPage/createSaleOrder";
         }
     }

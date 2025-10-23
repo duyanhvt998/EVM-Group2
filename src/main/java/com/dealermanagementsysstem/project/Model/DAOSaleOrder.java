@@ -5,8 +5,12 @@ import utils.DBUtils;
 import java.sql.*;
 import java.util.*;
 import java.math.BigDecimal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DAOSaleOrder {
+
+    private static final Logger log = LoggerFactory.getLogger(DAOSaleOrder.class);
 
     // ======================================================
     // 1️⃣  TẠO SALE ORDER MỚI
@@ -25,6 +29,10 @@ public class DAOSaleOrder {
         try {
             conn = DBUtils.getConnection();
             conn.setAutoCommit(false); // ⚙️ Transaction start
+            log.debug("Creating SaleOrder for customerId={} dealerId={} staffId={}",
+                    saleOrder.getCustomer().getCustomerID(),
+                    saleOrder.getDealer().getDealerID(),
+                    saleOrder.getStaff().getStaffID());
 
             // === Insert SaleOrder ===
             psOrder = conn.prepareStatement(sqlOrder, Statement.RETURN_GENERATED_KEYS);
@@ -32,20 +40,28 @@ public class DAOSaleOrder {
             psOrder.setInt(2, saleOrder.getDealer().getDealerID());
             psOrder.setInt(3, saleOrder.getStaff().getStaffID());
             psOrder.setString(4, saleOrder.getStatus());
-            psOrder.setInt(5, saleOrder.getDetail().stream().mapToInt(DTOSaleOrderDetail::getQuantity).sum());
-            BigDecimal totalAmount = saleOrder.getDetail().stream()
+        int totalQuantity = saleOrder.getDetail().stream().mapToInt(DTOSaleOrderDetail::getQuantity).sum();
+        psOrder.setInt(5, totalQuantity);
+        BigDecimal totalAmount = saleOrder.getDetail().stream()
                     .map(d -> d.getPrice().multiply(BigDecimal.valueOf(d.getQuantity())))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             psOrder.setBigDecimal(6, totalAmount);
 
             psOrder.executeUpdate();
+            log.trace("Inserted SaleOrder main row");
 
             // === Get generated SaleOrderID ===
             rs = psOrder.getGeneratedKeys();
             int saleOrderID = 0;
             if (rs.next()) {
                 saleOrderID = rs.getInt(1);
+                log.info("Generated SaleOrderID={}", saleOrderID);
             }
+
+            // Update aggregated fields on DTO for downstream view usage
+            saleOrder.setSaleOrderID(saleOrderID);
+            saleOrder.setTotalQuantity(totalQuantity);
+            saleOrder.setTotalAmount(totalAmount);
 
             // === Insert SaleOrderDetails ===
             psDetail = conn.prepareStatement(sqlDetail);
@@ -56,18 +72,21 @@ public class DAOSaleOrder {
                 psDetail.setInt(4, saleOrder.getDealer().getPolicyID()); // lấy từ dealer
                 psDetail.setInt(5, detail.getQuantity());
                 psDetail.addBatch();
+                log.trace("Queued SaleOrderDetail VIN={} qty={} price={}", detail.getVehicle().getVIN(), detail.getQuantity(), detail.getPrice());
             }
             psDetail.executeBatch();
+            log.debug("Inserted {} SaleOrderDetail rows", saleOrder.getDetail().size());
 
             conn.commit();
+            log.info("SaleOrder committed id={}", saleOrderID);
             return true;
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error creating SaleOrder - performing rollback", e);
             try {
                 if (conn != null) conn.rollback();
             } catch (SQLException ex) {
-                ex.printStackTrace();
+                log.error("Rollback failed", ex);
             }
         } finally {
             try {
@@ -76,7 +95,7 @@ public class DAOSaleOrder {
                 if (psDetail != null) psDetail.close();
                 if (conn != null) conn.close();
             } catch (SQLException ex) {
-                ex.printStackTrace();
+                log.error("Error closing resources", ex);
             }
         }
         return false;
@@ -109,6 +128,8 @@ public class DAOSaleOrder {
                 order.setSaleOrderID(rs.getInt("SaleOrderID"));
                 order.setCreatedAt(rs.getTimestamp("CreatedAt"));
                 order.setStatus(rs.getString("Status"));
+                order.setTotalAmount(rs.getBigDecimal("TotalAmount"));
+                order.setTotalQuantity(rs.getInt("TotalQuantity"));
 
                 // Customer
                 DTOCustomer customer = new DTOCustomer();
@@ -135,7 +156,7 @@ public class DAOSaleOrder {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error retrieving all SaleOrders", e);
         }
         return list;
     }
@@ -168,6 +189,8 @@ public class DAOSaleOrder {
                 order.setSaleOrderID(rs.getInt("SaleOrderID"));
                 order.setCreatedAt(rs.getTimestamp("CreatedAt"));
                 order.setStatus(rs.getString("Status"));
+                order.setTotalAmount(rs.getBigDecimal("TotalAmount"));
+                order.setTotalQuantity(rs.getInt("TotalQuantity"));
 
                 DTOCustomer c = new DTOCustomer();
                 c.setCustomerID(rs.getInt("CustomerID"));
@@ -189,7 +212,7 @@ public class DAOSaleOrder {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error retrieving SaleOrder by id={}", id, e);
         }
         return order;
     }
@@ -202,14 +225,17 @@ public class DAOSaleOrder {
 
         String sql = """
             SELECT sod.SODetailID, sod.SaleOrderID, sod.VIN, sod.Price, sod.Quantity,
-                   v.VehicleID, v.Model, v.Color, v.Brand
+                   v.ManufactureYear, v.ColorID, vm.ModelID, vm.ModelName, vm.BasePrice,
+                   vc.ColorName
             FROM SaleOrderDetail sod
             JOIN Vehicle v ON sod.VIN = v.VIN
+            LEFT JOIN VehicleModel vm ON v.ModelID = vm.ModelID
+            LEFT JOIN VehicleColor vc ON v.ColorID = vc.ColorID
             WHERE sod.SaleOrderID = ?
         """;
 
-        try (Connection conn = DBUtils.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+       try (Connection conn = DBUtils.getConnection();
+           PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, saleOrderID);
             ResultSet rs = ps.executeQuery();
@@ -217,9 +243,12 @@ public class DAOSaleOrder {
             while (rs.next()) {
                 DTOVehicle vehicle = new DTOVehicle();
                 vehicle.setVIN(rs.getString("VIN"));
-                vehicle.setModelID(rs.getInt("Model"));
-                vehicle.setModelName(rs.getString("Brand"));
-                vehicle.setColorName(rs.getString("Color"));
+                vehicle.setManufactureYear(rs.getInt("ManufactureYear"));
+                vehicle.setColorID(rs.getInt("ColorID"));
+                vehicle.setColorName(rs.getString("ColorName"));
+                vehicle.setModelID(rs.getInt("ModelID"));
+                vehicle.setModelName(rs.getString("ModelName"));
+                vehicle.setBasePrice(rs.getBigDecimal("BasePrice"));
 
                 DTOSaleOrderDetail detail = new DTOSaleOrderDetail();
                 detail.setSoDetailID(rs.getInt("SODetailID"));
@@ -232,7 +261,7 @@ public class DAOSaleOrder {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Error retrieving SaleOrder details saleOrderID={}", saleOrderID, e);
         }
         return details;
     }

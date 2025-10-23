@@ -13,6 +13,10 @@ public class DTOQuotation {
     private DTODiscountPolicy discountPolicy;
     private double totalPrice;
     private List<DTOQuotationDetail> quotationDetails;
+    // New fields for extended pricing logic
+    private int quantity = 1; // default single unit
+    private Double extraDiscountPercent; // optional extra discount chosen in UI
+    private DTODealerStaff staff; // staff who created the quotation
 
     public DTOQuotation() {
     }
@@ -100,5 +104,30 @@ public class DTOQuotation {
 
     public void setQuotationDetails(List<DTOQuotationDetail> quotationDetails) {
         this.quotationDetails = quotationDetails;
+    }
+
+    // Extended fields accessors
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public Double getExtraDiscountPercent() {
+        return extraDiscountPercent;
+    }
+
+    public void setExtraDiscountPercent(Double extraDiscountPercent) {
+        this.extraDiscountPercent = extraDiscountPercent;
+    }
+
+    public DTODealerStaff getStaff() {
+        return staff;
+    }
+
+    public void setStaff(DTODealerStaff staff) {
+        this.staff = staff;
     }
 }

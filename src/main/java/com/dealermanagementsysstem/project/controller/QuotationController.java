@@ -3,6 +3,8 @@ package com.dealermanagementsysstem.project.controller;
 import com.dealermanagementsysstem.project.Model.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +19,7 @@ import java.util.List;
 public class QuotationController {
 
     private final DAOQuotation dao = new DAOQuotation();
+    private static final Logger log = LoggerFactory.getLogger(QuotationController.class);
 
     // ✅ Hiển thị form báo giá
     @GetMapping("/new")
@@ -25,35 +28,34 @@ public class QuotationController {
             HttpSession session,
             Model model
     ) {
-        System.out.println("🧾 [DEBUG] Open quotation form for VIN: " + vin);
+    log.debug("Open quotation form VIN={}", vin);
 
         // 1️⃣ Lấy thông tin xe
-        System.out.println("🔍 [DEBUG] Looking for vehicle with VIN: " + vin);
+    log.trace("Fetching vehicle VIN={}", vin);
         DTOVehicle vehicle = dao.getVehicleByVIN(vin);
         if (vehicle == null) {
-            System.out.println("❌ [ERROR] Vehicle not found for VIN: " + vin);
+            log.warn("Vehicle not found VIN={}", vin);
             model.addAttribute("error", "Vehicle not found for VIN: " + vin + ". Please check the VIN and try again.");
             return "dealerPage/errorPage";
         }
-        System.out.println("✅ [SUCCESS] Vehicle found: " + vehicle.getModelName() + " (VIN: " + vehicle.getVIN() + ")");
+        log.debug("Vehicle found model={} VIN={}", vehicle.getModelName(), vehicle.getVIN());
 
         // 2️⃣ Lấy thông tin dealer từ session (debug)
         DTOAccount account = (DTOAccount) session.getAttribute("user");
-        System.out.println("🔎 [DEBUG] Session user: " + (account != null ? account.getUsername() : "null")
-                + ", dealerId=" + (account != null ? account.getDealerId() : null));
+    log.trace("Session user username={} dealerId={}", account != null ? account.getUsername() : null, account != null ? account.getDealerId() : null);
 
         DTODealer dealer = null;
         if (account != null && account.getDealerId() != null) {
             dealer = dao.getDealerByID(account.getDealerId());
-            System.out.println("🏢 [DEBUG] Resolved dealer from session: " + (dealer != null ? dealer.getDealerName() : "null"));
+            log.debug("Resolved dealer from session dealerName={}", dealer != null ? dealer.getDealerName() : null);
         } else {
             // No dealer in session: load dealer list so user can pick in the form instead of redirecting to login
             try {
                 List<DTODealer> dealerList = daoDealer.getAllDealers();
                 model.addAttribute("dealerList", dealerList);
-                System.out.println("📄 [DEBUG] No dealer in session. Providing dealerList size=" + (dealerList != null ? dealerList.size() : 0));
+                log.info("No dealer in session. Providing dealerList size={}", dealerList != null ? dealerList.size() : 0);
             } catch (Exception ex) {
-                System.out.println("❌ [ERROR] Failed to load dealer list: " + ex.getMessage());
+                log.error("Failed to load dealer list", ex);
             }
         }
 
@@ -65,9 +67,9 @@ public class QuotationController {
             DAOCustomer customerDAO = new DAOCustomer();
             List<DTOCustomer> customerList = customerDAO.getAllCustomers();
             model.addAttribute("customerList", customerList);
-            System.out.println("👥 [DEBUG] Loaded " + customerList.size() + " customers for selection");
+            log.debug("Loaded customers count={}", customerList.size());
         } catch (Exception ex) {
-            System.out.println("❌ [ERROR] Failed to load customer list: " + ex.getMessage());
+            log.error("Failed loading customer list", ex);
         }
 
         // 5️⃣ Truyền dữ liệu sang view
@@ -86,30 +88,30 @@ public class QuotationController {
             @RequestParam("customerID") int customerID,
             @RequestParam("vin") String vin,
             @RequestParam(value = "quantity", defaultValue = "1") int quantity,
+        @RequestParam(value = "extraDiscount", required = false) Double extraDiscount,
             @RequestParam(value = "dealerID", required = false) Integer dealerIDParam,
             HttpSession session,
             Model model
     ) {
-        System.out.println("💾 [DEBUG] Saving quotation | customerID=" + customerID + ", vin=" + vin
-                + ", quantity=" + quantity + ", dealerIDParam=" + dealerIDParam);
+    log.debug("Saving quotation customerID={} vin={} quantity={} dealerIDParam={}", customerID, vin, quantity, dealerIDParam);
         
         // Debug session info
         DTOAccount account = (DTOAccount) session.getAttribute("user");
-        System.out.println("🔍 [DEBUG] Session user: " + (account != null ? account.getUsername() : "null"));
+    log.trace("Session user username={}", account != null ? account.getUsername() : null);
 
         try {
             // 1️⃣ Get dealer info from session
             Integer resolvedDealerId = null;
             if (account != null && account.getDealerId() != null) {
                 resolvedDealerId = account.getDealerId();
-                System.out.println("🏢 [DEBUG] Using dealer from session: " + resolvedDealerId);
+                log.trace("Using dealer from session dealerId={}", resolvedDealerId);
             } else if (dealerIDParam != null) {
                 resolvedDealerId = dealerIDParam;
-                System.out.println("🏢 [DEBUG] Using dealer from form param: " + resolvedDealerId);
+                log.trace("Using dealer from param dealerId={}", resolvedDealerId);
             }
 
             if (resolvedDealerId == null) {
-                System.out.println("⚠️ [WARN] No dealer in session and no dealerID provided in form");
+                log.warn("No dealer resolved for quotation save");
                 model.addAttribute("error", "Please select a dealer to create quotation.");
                 return "dealerPage/quotationForm";
             }
@@ -146,24 +148,32 @@ public class QuotationController {
             quotation.setVehicle(vehicle);
             quotation.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
             quotation.setStatus("Pending");
+            quotation.setQuantity(Math.max(1, quantity));
+            quotation.setExtraDiscountPercent(extraDiscount);
+
+            // Staff (if exists in session account)
+            if (account != null && account.getDealerStaffId() != null) {
+                DTODealerStaff staff = new DTODealerStaff();
+                staff.setStaffID(account.getDealerStaffId());
+                quotation.setStaff(staff);
+            }
 
             // 5️⃣ Save quotation to database
             int quotationID = dao.insertQuotation(quotation);
 
             if (quotationID > 0) {
-                System.out.println("✅ [SUCCESS] Quotation saved successfully with ID: " + quotationID);
+                log.info("Quotation saved id={}", quotationID);
                 model.addAttribute("message", "Quotation created successfully! ID: " + quotationID);
                 model.addAttribute("quotationID", quotationID);
                 return "redirect:/quotation/preview/" + quotationID;
             } else {
-                System.out.println("❌ [FAILED] Failed to save quotation");
+                log.warn("Failed to save quotation vin={} dealerId={}", vin, dealer.getDealerID());
                 model.addAttribute("error", "Failed to create quotation. Please try again!");
                 return "dealerPage/quotationForm";
             }
 
         } catch (Exception e) {
-            System.out.println("❌ [ERROR] Exception while saving quotation: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Exception saving quotation vin={}", vin, e);
             model.addAttribute("error", "An error occurred while creating quotation: " + e.getMessage());
             return "dealerPage/quotationForm";
         }
@@ -172,18 +182,17 @@ public class QuotationController {
     // 🔥 CORE FLOW STEP 3: List all quotations (for dealer to review)
     @GetMapping("/list")
     public String listQuotations(Model model) {
-        System.out.println("📋 [DEBUG] Loading quotations list");
+    log.debug("Loading quotations list");
 
         try {
             List<DTOQuotation> quotations = dao.getAllQuotations();
             model.addAttribute("quotations", quotations);
             model.addAttribute("message", "Found " + quotations.size() + " quotations");
             
-            System.out.println("✅ [SUCCESS] Loaded " + quotations.size() + " quotations");
+            log.info("Loaded quotations size={}", quotations.size());
             return "dealerPage/quotationList";
         } catch (Exception e) {
-            System.out.println("❌ [ERROR] Failed to load quotations: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error loading quotations", e);
             model.addAttribute("error", "Failed to load quotations: " + e.getMessage());
             return "dealerPage/errorPage";
         }
@@ -192,7 +201,7 @@ public class QuotationController {
     // 🔥 CORE FLOW STEP 4: View quotation details
     @GetMapping("/detail/{id}")
     public String viewQuotationDetail(@PathVariable("id") int id, Model model) {
-        System.out.println("🔍 [DEBUG] Viewing quotation detail for ID: " + id);
+    log.debug("Viewing quotation detail id={}", id);
 
         try {
             DTOQuotation quotation = dao.getQuotationById(id);
@@ -211,19 +220,18 @@ public class QuotationController {
                     .mapToDouble(detail -> detail.getUnitPrice().doubleValue() * detail.getQuantity())
                     .sum();
                 quotation.setTotalPrice(totalPrice);
-                System.out.println("💰 [DEBUG] Calculated total price: $" + totalPrice);
+                log.trace("Calculated quotation total id={} totalPrice={}", id, totalPrice);
             } else {
-                System.out.println("⚠️ [WARNING] No quotation details found for ID: " + id);
+                log.warn("No quotation details found id={}", id);
             }
 
             model.addAttribute("quotation", quotation);
             model.addAttribute("details", details);
             
-            System.out.println("✅ [SUCCESS] Loaded quotation details for ID: " + id);
+            log.info("Loaded quotation details id={}", id);
             return "dealerPage/quotationDetail";
         } catch (Exception e) {
-            System.out.println("❌ [ERROR] Failed to load quotation details: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error loading quotation detail id={}", id, e);
             model.addAttribute("error", "Failed to load quotation details: " + e.getMessage());
             return "redirect:/quotation/list";
         }
@@ -232,31 +240,28 @@ public class QuotationController {
     // 🔥 CORE FLOW STEP 5: Approve quotation
     @PostMapping("/approve/{id}")
     public String approveQuotation(@PathVariable("id") int id, Model model) {
-        System.out.println("✅ [DEBUG] Approving quotation ID: " + id);
+    log.debug("Approving quotation id={}", id);
 
         try {
             // First, check if quotation exists and get current status
             DTOQuotation quotation = dao.getQuotationById(id);
             if (quotation == null) {
-                System.out.println("❌ [ERROR] Quotation not found for ID: " + id);
+                log.warn("Quotation not found id={} for approve", id);
                 model.addAttribute("error", "Quotation not found!");
                 return "redirect:/quotation/list";
             }
-            
-            System.out.println("🔍 [DEBUG] Current quotation status: " + quotation.getStatus());
-            System.out.println("🔍 [DEBUG] Attempting to update status to: Accepted");
+            log.trace("Current status={} will update to Accepted", quotation.getStatus());
             
             boolean success = dao.updateQuotationStatus(id, "Accepted");
             if (success) {
-                System.out.println("✅ [SUCCESS] Quotation approved successfully: " + id);
+                log.info("Quotation approved id={}", id);
                 model.addAttribute("message", "Quotation approved successfully!");
             } else {
-                System.out.println("❌ [FAILED] Failed to approve quotation: " + id);
+                log.warn("Failed to approve quotation id={}", id);
                 model.addAttribute("error", "Failed to approve quotation!");
             }
         } catch (Exception e) {
-            System.out.println("❌ [ERROR] Exception while approving quotation: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error approving quotation id={}", id, e);
             model.addAttribute("error", "An error occurred while approving quotation: " + e.getMessage());
         }
 
@@ -266,20 +271,19 @@ public class QuotationController {
     // 🔥 CORE FLOW STEP 6: Reject quotation
     @PostMapping("/reject/{id}")
     public String rejectQuotation(@PathVariable("id") int id, Model model) {
-        System.out.println("❌ [DEBUG] Rejecting quotation ID: " + id);
+    log.debug("Rejecting quotation id={}", id);
 
         try {
             boolean success = dao.updateQuotationStatus(id, "Rejected");
             if (success) {
-                System.out.println("✅ [SUCCESS] Quotation rejected successfully: " + id);
+                log.info("Quotation rejected id={}", id);
                 model.addAttribute("message", "Quotation rejected successfully!");
             } else {
-                System.out.println("❌ [FAILED] Failed to reject quotation: " + id);
+                log.warn("Failed to reject quotation id={}", id);
                 model.addAttribute("error", "Failed to reject quotation!");
             }
         } catch (Exception e) {
-            System.out.println("❌ [ERROR] Exception while rejecting quotation: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error rejecting quotation id={}", id, e);
             model.addAttribute("error", "An error occurred while rejecting quotation: " + e.getMessage());
         }
 
@@ -289,7 +293,7 @@ public class QuotationController {
     // 🔥 CORE FLOW: Quotation preview with PDF export and Create Order buttons
     @GetMapping("/preview/{id}")
     public String previewQuotation(@PathVariable("id") int id, Model model) {
-        System.out.println("👁️ [DEBUG] Previewing quotation for ID: " + id);
+    log.debug("Preview quotation id={}", id);
 
         try {
             DTOQuotation quotation = dao.getQuotationById(id);
@@ -313,11 +317,10 @@ public class QuotationController {
             model.addAttribute("quotation", quotation);
             model.addAttribute("details", details);
             
-            System.out.println("✅ [SUCCESS] Loaded quotation preview for ID: " + id);
+                log.info("Loaded quotation preview id={}", id);
             return "dealerPage/quotationPreview";
         } catch (Exception e) {
-            System.out.println("❌ [ERROR] Failed to load quotation preview: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error loading quotation preview id={}", id, e);
             model.addAttribute("error", "Failed to load quotation preview: " + e.getMessage());
             return "redirect:/quotation/list";
         }

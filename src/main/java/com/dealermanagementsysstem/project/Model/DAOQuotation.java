@@ -8,14 +8,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Repository
 public class DAOQuotation {
 
+    private static final Logger log = LoggerFactory.getLogger(DAOQuotation.class);
+
     // ✅ Lấy thông tin xe theo VIN (JOIN Vehicle + VehicleModel)
     public DTOVehicle getVehicleByVIN(String vin) {
         DTOVehicle vehicle = null;
-        System.out.println("🔍 [DEBUG] DAOQuotation.getVehicleByVIN called with VIN: " + vin);
+    log.debug("getVehicleByVIN VIN={}", vin);
 
         String sql = """
                     SELECT v.VIN, v.ManufactureYear, v.ColorID, vm.ModelName, vm.BasePrice
@@ -28,7 +32,7 @@ public class DAOQuotation {
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, vin);
-            System.out.println("🔍 [DEBUG] Executing SQL query for VIN: " + vin);
+            log.trace("Executing query for VIN={}", vin);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -38,14 +42,13 @@ public class DAOQuotation {
                     vehicle.setManufactureYear(rs.getInt("ManufactureYear"));
                     vehicle.setBasePrice(rs.getBigDecimal("BasePrice"));
                     vehicle.setColorID(rs.getInt("ColorID"));
-                    System.out.println("✅ [SUCCESS] Vehicle found in database: " + vehicle.getModelName() + " (ColorID: " + vehicle.getColorID() + ")");
+                    log.debug("Vehicle found model={} colorId={}", vehicle.getModelName(), vehicle.getColorID());
                 } else {
-                    System.out.println("❌ [ERROR] No vehicle found in database for VIN: " + vin);
+                    log.warn("No vehicle found VIN={}", vin);
                 }
             }
         } catch (SQLException e) {
-            System.out.println("❌ [ERROR] SQL error when fetching vehicle by VIN: " + vin);
-            e.printStackTrace();
+            log.error("SQL error fetching vehicle VIN={}", vin, e);
         }
 
         return vehicle;
@@ -77,8 +80,7 @@ public class DAOQuotation {
                 }
             }
         } catch (SQLException e) {
-            System.out.println("❌ Lỗi khi lấy thông tin dealer!");
-            e.printStackTrace();
+            log.error("Error getting dealer dealerID={}", dealerID, e);
         }
 
         return dealer;
@@ -101,15 +103,23 @@ public class DAOQuotation {
 
             try {
                 // 1. Calculate final price using the formula
-                BigDecimal finalPrice = calculateFinalPrice(
-                        quotation.getVehicle().getVIN(),
-                        quotation.getDealer().getDealerID()
-                );
+        BigDecimal baseFinalPrice = calculateFinalPrice(
+            quotation.getVehicle().getVIN(),
+            quotation.getDealer().getDealerID()
+        );
+
+        // Apply optional extra discount percent (e.g., promotional) if provided
+        BigDecimal finalPrice = baseFinalPrice;
+        if (quotation.getExtraDiscountPercent() != null && quotation.getExtraDiscountPercent() > 0) {
+            BigDecimal extra = BigDecimal.valueOf(quotation.getExtraDiscountPercent()).divide(BigDecimal.valueOf(100));
+            finalPrice = finalPrice.multiply(BigDecimal.ONE.subtract(extra));
+        }
 
                 // 2. Insert main Quotation
                 try (PreparedStatement ps = conn.prepareStatement(insertQuotationSQL, Statement.RETURN_GENERATED_KEYS)) {
                     ps.setInt(1, quotation.getCustomer().getCustomerID());
-                    ps.setInt(2, quotation.getDealer().getDealerID()); // Using dealerID as staffID for now
+                    int staffId = quotation.getStaff() != null ? quotation.getStaff().getStaffID() : quotation.getDealer().getDealerID(); // fallback old behavior
+                    ps.setInt(2, staffId);
                     ps.setInt(3, quotation.getDealer().getDealerID());
                     ps.setTimestamp(4, quotation.getCreatedAt());
                     ps.setString(5, quotation.getStatus() != null ? quotation.getStatus() : "Pending");
@@ -124,7 +134,7 @@ public class DAOQuotation {
                     try (ResultSet rs = ps.getGeneratedKeys()) {
                         if (rs.next()) {
                             quotationID = rs.getInt(1);
-                            System.out.println("✅ Quotation inserted successfully with ID: " + quotationID);
+                            log.info("Quotation inserted id={}", quotationID);
                         } else {
                             throw new SQLException("Failed to retrieve QuotationID.");
                         }
@@ -135,13 +145,13 @@ public class DAOQuotation {
                         psDetail.setInt(1, quotationID);
                         psDetail.setString(2, quotation.getVehicle().getVIN());
                         psDetail.setBigDecimal(3, finalPrice);
-                        psDetail.setInt(4, 1); // Default quantity
+                        psDetail.setInt(4, Math.max(1, quotation.getQuantity()));
                         psDetail.setInt(5, quotation.getVehicle().getColorID());
 
-                        System.out.println("🔍 [DEBUG] Inserting QuotationDetail with ColorID: " + quotation.getVehicle().getColorID());
+                        log.trace("Insert QuotationDetail colorId={}", quotation.getVehicle().getColorID());
                         psDetail.executeUpdate();
 
-                        System.out.println("✅ QuotationDetail inserted with price: " + finalPrice);
+                        log.debug("QuotationDetail price={} qty={} extraDiscount={} basePrice={} staffId={}", finalPrice, quotation.getQuantity(), quotation.getExtraDiscountPercent(), baseFinalPrice, staffId);
                     }
 
                     conn.commit();
@@ -150,13 +160,12 @@ public class DAOQuotation {
 
             } catch (SQLException e) {
                 conn.rollback();
-                System.err.println("❌ Transaction failed, rolled back!");
-                e.printStackTrace();
+                log.error("Transaction failed, rollback", e);
                 return -1;
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Insert quotation outer error", e);
             return -1;
         }
     }
@@ -223,8 +232,7 @@ public class DAOQuotation {
                 }
             }
         } catch (SQLException e) {
-            System.out.println("❌ Error while fetching quotation by ID!");
-            e.printStackTrace();
+            log.error("Error fetching quotation id={}", quotationID, e);
         }
 
         return quotation;
@@ -305,8 +313,7 @@ public class DAOQuotation {
             }
 
         } catch (SQLException e) {
-            System.out.println("❌ Error while fetching all quotations!");
-            e.printStackTrace();
+            log.error("Error fetching all quotations", e);
         }
 
         return quotations;
@@ -315,7 +322,7 @@ public class DAOQuotation {
     // 🔥 CORE FLOW STEP 4: Update quotation status (Approve/Reject)
     public boolean updateQuotationStatus(int quotationID, String newStatus) {
         String sql = "UPDATE Quotation SET Status = ? WHERE QuotationID = ?";
-        System.out.println("🔍 [DEBUG] DAOQuotation.updateQuotationStatus called with ID: " + quotationID + ", Status: " + newStatus);
+    log.debug("updateQuotationStatus id={} status={}", quotationID, newStatus);
 
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -323,23 +330,21 @@ public class DAOQuotation {
             ps.setString(1, newStatus);
             ps.setInt(2, quotationID);
 
-            System.out.println("🔍 [DEBUG] Executing SQL: " + sql + " with parameters: [" + newStatus + ", " + quotationID + "]");
+            log.trace("Executing status update id={} status={}", quotationID, newStatus);
 
             int affectedRows = ps.executeUpdate();
-            System.out.println("🔍 [DEBUG] SQL execution result: " + affectedRows + " rows affected");
+            log.trace("Status update affectedRows={}", affectedRows);
 
             if (affectedRows > 0) {
-                System.out.println("✅ Quotation status updated successfully: " + quotationID + " -> " + newStatus);
+                log.info("Quotation status updated id={} -> {}", quotationID, newStatus);
                 return true;
             } else {
-                System.out.println("⚠️ No quotation was updated (0 rows affected). Quotation ID " + quotationID + " may not exist or already has status " + newStatus);
+                log.warn("No quotation updated id={} status={}", quotationID, newStatus);
                 return false;
             }
 
         } catch (SQLException e) {
-            System.out.println("❌ Failed to update quotation status!");
-            System.out.println("❌ [ERROR] SQL Exception: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Failed updating quotation status id={} status={}", quotationID, newStatus, e);
             return false;
         }
     }
@@ -356,12 +361,11 @@ public class DAOQuotation {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     String status = rs.getString("Status");
-                    return "Accepted".equalsIgnoreCase(status);
+                    return "Accepted".equalsIgnoreCase(status) || "Approved".equalsIgnoreCase(status);
                 }
             }
         } catch (SQLException e) {
-            System.out.println("❌ Error checking quotation approval status!");
-            e.printStackTrace();
+            log.error("Error checking approved quotation id={}", quotationID, e);
         }
 
         return false;
@@ -468,8 +472,7 @@ public class DAOQuotation {
                 }
             }
         } catch (SQLException e) {
-            System.out.println("❌ Error while fetching quotations by dealer!");
-            e.printStackTrace();
+            log.error("Error fetching quotations by dealer dealerID={}", dealerID, e);
         }
 
         return quotations;
@@ -511,18 +514,13 @@ public class DAOQuotation {
                             .multiply(BigDecimal.ONE.subtract(manufacturerDiscount.divide(new BigDecimal(100))))
                             .multiply(BigDecimal.ONE.subtract(dealerDiscount.divide(new BigDecimal(100))));
 
-                    System.out.println("💰 Price calculation for VIN " + vin + ":");
-                    System.out.println("   BasePrice: " + basePrice);
-                    System.out.println("   ManufacturerDiscount: " + manufacturerDiscount + "%");
-                    System.out.println("   DealerDiscount: " + dealerDiscount + "%");
-                    System.out.println("   FinalPrice: " + finalPrice);
+                    log.debug("Price calc VIN={} base={} manufacturerDiscount={} dealerDiscount={} final={}", vin, basePrice, manufacturerDiscount, dealerDiscount, finalPrice);
 
                     return finalPrice;
                 }
             }
         } catch (SQLException e) {
-            System.out.println("❌ Error calculating final price!");
-            e.printStackTrace();
+            log.error("Error calculating final price vin={} dealerID={}", vin, dealerID, e);
         }
 
         return BigDecimal.ZERO;
@@ -546,16 +544,15 @@ public class DAOQuotation {
 
             int affectedRows = ps.executeUpdate();
             if (affectedRows > 0) {
-                System.out.println("✅ QuotationDetail inserted successfully");
+                log.info("QuotationDetail inserted quotationID={} vin={}", quotationID, vin);
                 return true;
             } else {
-                System.out.println("⚠️ No QuotationDetail was inserted (0 rows affected).");
+                log.warn("No QuotationDetail inserted quotationID={} vin={}", quotationID, vin);
                 return false;
             }
 
         } catch (SQLException e) {
-            System.out.println("❌ Failed to insert QuotationDetail!");
-            e.printStackTrace();
+            log.error("Failed to insert QuotationDetail quotationID={} vin={}", quotationID, vin, e);
             return false;
         }
     }
@@ -594,8 +591,7 @@ public class DAOQuotation {
                 }
             }
         } catch (SQLException e) {
-            System.out.println("❌ Error while fetching quotation details!");
-            e.printStackTrace();
+            log.error("Error fetching quotation details quotationID={}", quotationID, e);
         }
 
         return details;

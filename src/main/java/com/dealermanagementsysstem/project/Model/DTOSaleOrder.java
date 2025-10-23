@@ -1,6 +1,7 @@
 package com.dealermanagementsysstem.project.Model;
 
 import java.sql.Timestamp;
+import java.math.BigDecimal;
 import java.util.List;
 
 public class DTOSaleOrder {
@@ -11,6 +12,9 @@ public class DTOSaleOrder {
     private Timestamp createdAt;
     private String status;
     private List<DTOSaleOrderDetail> detail; // 🔹 Danh sách chi tiết đơn hàng
+    // Aggregated fields
+    private int totalQuantity;            // Tổng số lượng (sum of details)
+    private BigDecimal totalAmount;       // Tổng tiền (sum of price * quantity)
 
     public DTOSaleOrder() {
     }
@@ -33,6 +37,15 @@ public class DTOSaleOrder {
 
     public void setSaleOrderID(int saleOrderID) {
         this.saleOrderID = saleOrderID;
+    }
+
+    // Alias methods for legacy Thymeleaf templates referencing orderID instead of saleOrderID
+    public int getOrderID() {
+        return getSaleOrderID();
+    }
+
+    public void setOrderID(int id) {
+        setSaleOrderID(id);
     }
 
     public DTOCustomer getCustomer() {
@@ -67,6 +80,15 @@ public class DTOSaleOrder {
         this.createdAt = createdAt;
     }
 
+    // === Thymeleaf legacy alias for orderDate ===
+    public Timestamp getOrderDate() {
+        return getCreatedAt();
+    }
+
+    public void setOrderDate(Timestamp ts) {
+        setCreatedAt(ts);
+    }
+
     public String getStatus() {
         return status;
     }
@@ -81,5 +103,23 @@ public class DTOSaleOrder {
 
     public void setDetail(List<DTOSaleOrderDetail> detail) {
         this.detail = detail;
+    }
+
+    // === Aggregated total quantity ===
+    public int getTotalQuantity() {
+        return totalQuantity;
+    }
+
+    public void setTotalQuantity(int totalQuantity) {
+        this.totalQuantity = totalQuantity;
+    }
+
+    // === Aggregated total amount ===
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
     }
 }
