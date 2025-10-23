@@ -25,12 +25,39 @@ public class PurchaseOrderController {
     /**
      * 🔹 Trang danh sách đơn hàng
      */
+    /**
+     * 🔹 Trang danh sách đơn hàng (chỉ hiển thị đơn của Dealer đang đăng nhập)
+     */
     @GetMapping("")
     public String showOrderList(Model model) {
-        List<DTOPurchaseOrder> orders = daoPurchaseOrder.getAllPurchaseOrders();
-        model.addAttribute("orders", orders);
+        try {
+            // Lấy email của người đăng nhập (Spring Security)
+            org.springframework.security.core.Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            org.springframework.security.core.userdetails.User user =
+                    (org.springframework.security.core.userdetails.User) auth.getPrincipal();
+            String email = user.getUsername();
+
+            // Lấy DealerID dựa theo email đăng nhập
+            int dealerId = daoPurchaseOrder.getDealerIdByEmail(email);
+
+            if (dealerId <= 0) {
+                model.addAttribute("message", "❌ Không tìm thấy Dealer tương ứng với tài khoản đăng nhập (" + email + ")");
+                model.addAttribute("orders", List.of());
+                return "dealerPage/orderStatusList";
+            }
+
+            // Lấy danh sách đơn hàng theo DealerID
+            List<DTOPurchaseOrder> orders = daoPurchaseOrder.getPurchaseOrdersByDealerId(dealerId);
+
+            model.addAttribute("orders", orders);
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("message", "⚠️ Lỗi khi tải danh sách đơn hàng: " + e.getMessage());
+        }
+
         return "dealerPage/orderStatusList";
     }
+
 
     /**
      * 🔹 Khi chọn xe → mở form nhập chi tiết đơn hàng
