@@ -168,7 +168,7 @@
                     </div>
 
                     <div class="actions-container">
-                        <div class="title">Quick Actions</div>
+                        <div class="title">Actions</div>
                         <div class="button-group">
 
                             <div th:if="${actionRole == 'DEALER'}">
@@ -177,6 +177,16 @@
                                         <i class="fas fa-file-invoice-dollar"></i>Quotation
                                     </button>
                                 </a>
+
+                                <form method="get" action="/orderdealer/create">
+                                    <input type="hidden" name="modelId" th:value="${vehicle.modelID}">
+                                    <input type="hidden" name="colorId" th:value="${vehicle.colorID}">
+                                    <input type="hidden" name="modelName" th:value="${vehicle.model.modelName}">
+
+                                    <button class="rounded-btn action-btn update-btn" type="submit">
+                                        <i class="fas fa-file-invoice-dollar"></i>Order to inventory
+                                    </button>
+                                </form>
                             </div>
 
                             <div th:if="${actionRole == 'EVM'}">
