@@ -8,7 +8,7 @@ public class DTOSaleOrderDetail {
     private DTOVehicle vehicle;
     private BigDecimal price;
     private int quantity;
-
+    private int quotationID;
     public DTOSaleOrderDetail() {
     }
 
@@ -18,6 +18,14 @@ public class DTOSaleOrderDetail {
         this.vehicle = vehicle;
         this.price = price;
         this.quantity = quantity;
+    }
+
+    public int getQuotationID() {
+        return quotationID;
+    }
+
+    public void setQuotationID(int quotationID) {
+        this.quotationID = quotationID;
     }
 
     public int getQuantity() {

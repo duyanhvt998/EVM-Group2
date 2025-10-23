@@ -2,12 +2,10 @@ package com.dealermanagementsysstem.project.controller;
 
 import com.dealermanagementsysstem.project.Model.*;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,65 +15,47 @@ import java.util.List;
 @RequestMapping("/saleorder")
 public class OrderController {
 
-    private final DAOSaleOrder daoSaleOrder;
-    private final DAOQuotation daoQuotation;
-    private final DAODealer daoDealer;
-
-    @Autowired
-    public OrderController(DAODealer daoDealer) {
-        this.daoSaleOrder = new DAOSaleOrder();
-        this.daoQuotation = new DAOQuotation();
-        this.daoDealer = daoDealer;
-    }
+    private final DAOSaleOrder dao = new DAOSaleOrder();
 
     // ======================================================
-    // 1️⃣ DANH SÁCH TẤT CẢ ĐƠN HÀNG
+    // 1️⃣ HIỂN THỊ DANH SÁCH TẤT CẢ ĐƠN HÀNG
     // ======================================================
     @GetMapping
     public String listSaleOrders(Model model) {
-        List<DTOSaleOrder> orders = daoSaleOrder.getAllSaleOrders();
+        List<DTOSaleOrder> orders = dao.getAllSaleOrders();
         model.addAttribute("orders", orders);
-        return "dealerPage/dealerCustomerOrderList";
+        return "dealerPage/customerOrderList";
     }
 
     // ======================================================
-    // 2️⃣ FORM TẠO ĐƠN HÀNG MỚI (từ quotation đã duyệt)
+    // 2️⃣ FORM TẠO ĐƠN HÀNG MỚI
     // ======================================================
     @GetMapping("/new")
     public String showCreateForm(Model model, HttpSession session) {
-        try {
-            DTOAccount account = (DTOAccount) session.getAttribute("user");
-            if (account == null || account.getDealerId() == null) {
-                model.addAttribute("error", "Bạn cần đăng nhập bằng tài khoản Dealer!");
-                return "redirect:/login";
-            }
-
-            int dealerId = account.getDealerId();
-            List<DTOQuotation> approvedQuotations = daoQuotation.getQuotationsByDealer(dealerId)
-                    .stream()
-                    .filter(q -> "Approved".equalsIgnoreCase(q.getStatus()))
-                    .toList();
-
-            if (approvedQuotations.isEmpty()) {
-                model.addAttribute("error", "Không có báo giá nào đã được duyệt.");
-                model.addAttribute("redirectUrl", "/quotation/list");
-                return "dealerPage/noQuotations";
-            }
-
-            model.addAttribute("order", new DTOSaleOrder());
-            model.addAttribute("quotations", approvedQuotations);
-            model.addAttribute("message", "Tìm thấy " + approvedQuotations.size() + " báo giá đã duyệt.");
-            return "dealerPage/createSaleOrder";
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            model.addAttribute("error", "Lỗi khi tải form tạo đơn hàng: " + e.getMessage());
-            return "dealerPage/errorPage";
+        DTOAccount account = (DTOAccount) session.getAttribute("user");
+        if (account == null || account.getDealerId() == null) {
+            model.addAttribute("error", "Bạn cần đăng nhập bằng tài khoản dealer!");
+            return "redirect:/login";
         }
+
+        DAOQuotation quotationDAO = new DAOQuotation();
+        List<DTOQuotation> approvedQuotations = quotationDAO.getQuotationsByDealer(account.getDealerId())
+                .stream()
+                .filter(q -> "Approved".equalsIgnoreCase(q.getStatus()))
+                .toList();
+
+        if (approvedQuotations.isEmpty()) {
+            model.addAttribute("error", "Không có quotation nào được duyệt!");
+            return "dealerPage/noQuotations";
+        }
+
+        model.addAttribute("order", new DTOSaleOrder());
+        model.addAttribute("quotations", approvedQuotations);
+        return "dealerPage/createSaleOrder";
     }
 
     // ======================================================
-    // 3️⃣ XỬ LÝ SUBMIT FORM TẠO SALE ORDER
+    // 3️⃣ XỬ LÝ SUBMIT FORM
     // ======================================================
     @PostMapping("/insert")
     public String insertSaleOrder(
@@ -87,123 +67,79 @@ public class OrderController {
             HttpSession session,
             Model model
     ) {
-        System.out.println(vin);
         DTOAccount account = (DTOAccount) session.getAttribute("user");
         if (account == null) {
             model.addAttribute("error", "Bạn cần đăng nhập để tạo đơn hàng!");
-            System.out.println("Noaccount found");
             return "redirect:/login";
         }
 
         Integer dealerID = account.getDealerId();
         if (dealerID == null) {
-            model.addAttribute("error", "Tài khoản hiện tại không có DealerID hợp lệ!");
+            model.addAttribute("error", "Tài khoản hiện tại không hợp lệ!");
             return "redirect:/saleorder";
         }
 
-        try {
-            // 🧩 Kiểm tra báo giá
-            DTOQuotation quotation = daoQuotation.getQuotationById(quotationID);
-            if (quotation == null) {
-                model.addAttribute("error", "Không tìm thấy báo giá #" + quotationID);
-                return "redirect:/quotation/list";
-            }
+        DAOQuotation quotationDAO = new DAOQuotation();
+        DTOQuotation quotation = quotationDAO.getQuotationById(quotationID);
+        if (quotation == null || !"Approved".equalsIgnoreCase(quotation.getStatus())) {
+            model.addAttribute("error", "Quotation không hợp lệ hoặc chưa được duyệt!");
+            return "redirect:/quotation/list";
+        }
 
-            if (!daoQuotation.isQuotationApproved(quotationID)) {
-                model.addAttribute("error", "Báo giá chưa được duyệt! Trạng thái hiện tại: " + quotation.getStatus());
-                return "redirect:/quotation/list";
-            }
+        // === Build DTO ===
+        DTOSaleOrder order = new DTOSaleOrder();
+        DTOCustomer customer = new DTOCustomer();
+        customer.setCustomerID(customerID);
+        order.setCustomer(customer);
 
-            if (quotation.getDealer().getDealerID() != dealerID) {
-                model.addAttribute("error", "Báo giá thuộc dealer khác!");
-                return "redirect:/quotation/list";
-            }
+        DTODealer dealer = new DTODealer();
+        dealer.setDealerID(dealerID);
+        dealer.setPolicyID(quotation.getDealer().getPolicyID());
+        order.setDealer(dealer);
 
-            if (quotation.getCustomer().getCustomerID() != customerID) {
-                model.addAttribute("error", "Khách hàng không trùng với báo giá!");
-                return "redirect:/quotation/list";
-            }
+        DTODealerStaff staff = new DTODealerStaff();
+        staff.setStaffID(staffID);
+        order.setStaff(staff);
 
-            List<DTOQuotationDetail> quotationDetails = daoQuotation.getQuotationDetails(quotationID);
-            if (quotationDetails.isEmpty()) {
-                model.addAttribute("error", "Không có chi tiết báo giá!");
-                return "redirect:/quotation/list";
-            }
+        order.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
+        order.setStatus(status);
 
-            DTOQuotationDetail qDetail = quotationDetails.get(0);
-            BigDecimal price = qDetail.getUnitPrice();
+        // === Detail ===
+        DTOVehicle vehicle = new DTOVehicle();
+        vehicle.setVIN(vin);
 
-            // 🔧 Tạo đơn hàng
-            DTOSaleOrder order = new DTOSaleOrder();
-            order.setCustomer(new DTOCustomer());
-            order.getCustomer().setCustomerID(customerID);
+        DTOSaleOrderDetail detail = new DTOSaleOrderDetail();
+        detail.setVehicle(vehicle);
+        detail.setPrice(quotation.getQuotationDetails().get(0).getUnitPrice());
+        detail.setQuantity(1);
 
-            order.setDealer(new DTODealer());
-            order.getDealer().setDealerID(dealerID);
+        List<DTOSaleOrderDetail> details = new ArrayList<>();
+        details.add(detail);
+        order.setDetail(details);
 
-            order.setStaff(new DTODealerStaff());
-            order.getStaff().setStaffID(staffID);
+        // === Insert ===
+        boolean success = dao.createSaleOrder(order);
 
-            order.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
-            order.setStatus(status);
-
-            // 🔧 Chi tiết đơn hàng
-            DTOVehicle vehicle = new DTOVehicle();
-            vehicle.setVIN(vin);
-
-            DTOSaleOrderDetail detail = new DTOSaleOrderDetail();
-            detail.setVehicle(vehicle);
-            detail.setPrice(price);
-            detail.setQuantity(1);
-
-            List<DTOSaleOrderDetail> details = new ArrayList<>();
-            details.add(detail);
-            order.setDetail(details);
-
-            // 💾 Lưu vào DB
-            boolean success = daoSaleOrder.insertSaleOrder(order);
-            if (success) {
-                model.addAttribute("message", "Tạo đơn hàng thành công!");
-                return "redirect:/saleorder";
-            } else {
-                model.addAttribute("error", "Không thể tạo đơn hàng!");
-                return "dealerPage/createSaleOrder";
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            model.addAttribute("error", "Lỗi khi tạo đơn hàng: " + e.getMessage());
-            return "dealerPage/errorPage";
+        if (success) {
+            model.addAttribute("message", "Tạo đơn hàng thành công!");
+            return "redirect:/saleorder";
+        } else {
+            model.addAttribute("error", "Không thể tạo đơn hàng, vui lòng thử lại.");
+            return "dealerPage/createSaleOrder";
         }
     }
 
     // ======================================================
-    // 4️⃣ XEM CHI TIẾT 1 ĐƠN HÀNG
+    // 4️⃣ CHI TIẾT 1 ĐƠN HÀNG
     // ======================================================
     @GetMapping("/detail/{id}")
     public String viewOrderDetail(@PathVariable("id") int id, Model model) {
-        DTOSaleOrder order = daoSaleOrder.getSaleOrderById(id);
+        DTOSaleOrder order = dao.getSaleOrderById(id);
         if (order == null) {
             model.addAttribute("error", "Không tìm thấy đơn hàng!");
             return "redirect:/saleorder";
         }
         model.addAttribute("order", order);
         return "dealerPage/saleOrderDetail";
-    }
-
-    // ======================================================
-    // 5️⃣ FORM TẠO ĐƠN HÀNG DÀNH CHO ADMIN / EVM
-    // ======================================================
-    @GetMapping("/admin/create")
-    public String createOrderFormForEVM(Model model) {
-        try {
-            List<DTODealer> dealerList = daoDealer.getAllDealers();
-            model.addAttribute("dealerList", dealerList);
-            model.addAttribute("order", new DTOSaleOrder());
-            return "evmPage/order-create";
-        } catch (Exception e) {
-            model.addAttribute("error", "Không thể tải danh sách dealer: " + e.getMessage());
-            return "dealerPage/errorPage";
-        }
     }
 }
