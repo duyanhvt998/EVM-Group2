@@ -21,9 +21,9 @@ import java.sql.SQLException;
  */
 public class DBUtils {
 
-    private static final String DEFAULT_DB_URL = "jdbc:sqlserver://172.18.195.60:1433;databaseName=CarDealerDBI;encrypt=true;trustServerCertificate=true";
+    private static final String DEFAULT_DB_URL = "jdbc:sqlserver://localhost:1433;databaseName=CarDealerDBI;encrypt=true;trustServerCertificate=true";
     private static final String DEFAULT_USER = "sa";
-    private static final String DEFAULT_PASS = "StrongPwd@123";
+    private static final String DEFAULT_PASS = "12345";
     public static Connection getConnection() {
         Connection conn = null;
         try {
