@@ -16,9 +16,10 @@
     grid-template-columns: 1fr 1fr;
     gap: 40px;
     padding: 1px;
-    overflow: scroll;
+    overflow-y: auto;
+    overflow-x: hidden;
     width: 100%;
-    height: 880px;
+    height: 95vh;
 }
 
 .right-column {
