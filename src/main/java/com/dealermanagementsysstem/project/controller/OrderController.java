@@ -26,7 +26,7 @@ public class OrderController {
     public String listSaleOrders(Model model) {
         List<DTOSaleOrder> orders = dao.getAllSaleOrders();
         model.addAttribute("orders", orders);
-        return "dealerPage/customerOrderList";
+        return "dealerPage/dealerCustomerOrderList";
     }
 
     // ======================================================
@@ -131,10 +131,12 @@ public class OrderController {
         boolean success = dao.createSaleOrder(order);
 
         if (success) {
+            System.out.println("Success");
             model.addAttribute("message", "Tạo đơn hàng thành công!");
             return "redirect:/saleorder";
         } else {
             model.addAttribute("error", "Không thể tạo đơn hàng, vui lòng thử lại.");
+            System.out.println("Success");
             return "dealerPage/createSaleOrder";
         }
     }
