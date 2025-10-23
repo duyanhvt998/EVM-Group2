@@ -1,7 +1,8 @@
 package com.dealermanagementsysstem.project.Model;
 
-import java.sql.Date;
-import java.sql.Timestamp;
+import org.springframework.format.annotation.DateTimeFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class DTOCustomer {
     private int customerID;
@@ -9,13 +10,21 @@ public class DTOCustomer {
     private String phone;
     private String email;
     private String address;
-    private Timestamp createdAt;
-    private Date birthDate;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime createdAt;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate birthDate;
+
     private String note;
-    private Timestamp testDriveSchedule;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    private LocalDateTime testDriveSchedule;
+
     private String vehicleInterest;
 
-    // ✅ Getters & Setters
+    // === GETTER / SETTER ===
     public int getCustomerID() { return customerID; }
     public void setCustomerID(int customerID) { this.customerID = customerID; }
 
@@ -23,7 +32,7 @@ public class DTOCustomer {
     public void setFullName(String fullName) { this.fullName = fullName; }
 
     public String getPhone() { return phone; }
-    public String getPhoneNumber() { return phone; } // alias getter
+    public String getPhoneNumber() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
 
     public String getEmail() { return email; }
@@ -32,17 +41,17 @@ public class DTOCustomer {
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
 
-    public Timestamp getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public Date getBirthDate() { return birthDate; }
-    public void setBirthDate(Date birthDate) { this.birthDate = birthDate; }
+    public LocalDate getBirthDate() { return birthDate; }
+    public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
 
     public String getNote() { return note; }
     public void setNote(String note) { this.note = note; }
 
-    public Timestamp getTestDriveSchedule() { return testDriveSchedule; }
-    public void setTestDriveSchedule(Timestamp testDriveSchedule) { this.testDriveSchedule = testDriveSchedule; }
+    public LocalDateTime getTestDriveSchedule() { return testDriveSchedule; }
+    public void setTestDriveSchedule(LocalDateTime testDriveSchedule) { this.testDriveSchedule = testDriveSchedule; }
 
     public String getVehicleInterest() { return vehicleInterest; }
     public void setVehicleInterest(String vehicleInterest) { this.vehicleInterest = vehicleInterest; }

@@ -188,4 +188,18 @@ public class SecurityConfig {
 
         return http.build();
     }
+
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/css/**", "/scripts/**", "/images/**").permitAll()  // ⚡ THÊM DÒNG NÀY
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .permitAll()
+                )
+                .logout(logout -> logout.permitAll());
+    }
+
 }
