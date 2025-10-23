@@ -370,15 +370,20 @@ public class DAOQuotation {
         List<DTOQuotation> quotations = new ArrayList<>();
 
         String sql = """
-            SELECT q.QuotationID, q.CreatedAt, q.Status, q.LevelID,
-                   c.CustomerID, c.FullName AS CustomerName, c.Email AS CustomerEmail, c.Phone AS CustomerPhone,
-                   d.DealerID, d.DealerName, d.Email AS DealerEmail, d.Phone AS DealerPhone
-            FROM Quotation q
-            JOIN Customer c ON q.CustomerID = c.CustomerID
-            JOIN Dealer d ON q.DealerID = d.DealerID
-            WHERE q.DealerID = ?
-            ORDER BY q.CreatedAt DESC
-        """;
+        SELECT q.QuotationID, q.CreatedAt, q.Status, q.LevelID,
+               c.CustomerID, c.FullName AS CustomerName, c.Email AS CustomerEmail, c.Phone AS CustomerPhone,
+               d.DealerID, d.DealerName, d.Email AS DealerEmail, d.Phone AS DealerPhone,
+               qd.VIN, qd.UnitPrice, qd.Quantity, vc.ColorName, vm.ModelName, vm.BasePrice, v.ManufactureYear
+        FROM Quotation q
+        JOIN Customer c ON q.CustomerID = c.CustomerID
+        JOIN Dealer d ON q.DealerID = d.DealerID
+        LEFT JOIN QuotationDetail qd ON q.QuotationID = qd.QuotationID
+        LEFT JOIN VehicleColor vc ON qd.ColorID = vc.ColorID
+        LEFT JOIN Vehicle v ON qd.VIN = v.VIN
+        LEFT JOIN VehicleModel vm ON v.ModelID = vm.ModelID
+        WHERE q.DealerID = ?
+        ORDER BY q.CreatedAt DESC
+    """;
 
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -386,29 +391,57 @@ public class DAOQuotation {
             ps.setInt(1, dealerID);
 
             try (ResultSet rs = ps.executeQuery()) {
+                int lastQuotationId = -1;
+
                 while (rs.next()) {
-                    DTOQuotation quotation = new DTOQuotation();
-                    quotation.setQuotationID(rs.getInt("QuotationID"));
-                    quotation.setCreatedAt(rs.getTimestamp("CreatedAt"));
-                    quotation.setStatus(rs.getString("Status"));
+                    int quotationId = rs.getInt("QuotationID");
 
-                    // Customer info
-                    DTOCustomer customer = new DTOCustomer();
-                    customer.setCustomerID(rs.getInt("CustomerID"));
-                    customer.setFullName(rs.getString("CustomerName"));
-                    customer.setEmail(rs.getString("CustomerEmail"));
-                    customer.setPhone(rs.getString("CustomerPhone"));
-                    quotation.setCustomer(customer);
+                    // If new quotation, create new object
+                    if (quotationId != lastQuotationId) {
+                        DTOQuotation quotation = new DTOQuotation();
+                        quotation.setQuotationID(quotationId);
+                        quotation.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                        quotation.setStatus(rs.getString("Status"));
 
-                    // Dealer info
-                    DTODealer dealer = new DTODealer();
-                    dealer.setDealerID(rs.getInt("DealerID"));
-                    dealer.setDealerName(rs.getString("DealerName"));
-                    dealer.setEmail(rs.getString("DealerEmail"));
-                    dealer.setPhone(rs.getString("DealerPhone"));
-                    quotation.setDealer(dealer);
+                        // Customer info
+                        DTOCustomer customer = new DTOCustomer();
+                        customer.setCustomerID(rs.getInt("CustomerID"));
+                        customer.setFullName(rs.getString("CustomerName"));
+                        customer.setEmail(rs.getString("CustomerEmail"));
+                        customer.setPhone(rs.getString("CustomerPhone"));
+                        quotation.setCustomer(customer);
 
-                    quotations.add(quotation);
+                        // Dealer info
+                        DTODealer dealer = new DTODealer();
+                        dealer.setDealerID(rs.getInt("DealerID"));
+                        dealer.setDealerName(rs.getString("DealerName"));
+                        dealer.setEmail(rs.getString("DealerEmail"));
+                        dealer.setPhone(rs.getString("DealerPhone"));
+                        quotation.setDealer(dealer);
+
+                        quotations.add(quotation);
+                        lastQuotationId = quotationId;
+                    }
+
+                    // Add vehicle and price information if available
+                    if (rs.getString("VIN") != null) {
+                        DTOQuotation quotation = quotations.get(quotations.size() - 1);
+
+                        // Calculate total price (UnitPrice * Quantity)
+                        BigDecimal unitPrice = rs.getBigDecimal("UnitPrice");
+                        int quantity = rs.getInt("Quantity");
+                        double totalPrice = unitPrice.doubleValue() * quantity;
+                        quotation.setTotalPrice(totalPrice);
+
+                        // Set vehicle info
+                        DTOVehicle vehicle = new DTOVehicle();
+                        vehicle.setVIN(rs.getString("VIN"));
+                        vehicle.setModelName(rs.getString("ModelName"));
+                        vehicle.setColorName(rs.getString("ColorName"));
+                        vehicle.setManufactureYear(rs.getInt("ManufactureYear"));
+                        vehicle.setBasePrice(rs.getBigDecimal("BasePrice"));
+                        quotation.setVehicle(vehicle);
+                    }
                 }
             }
         } catch (SQLException e) {
