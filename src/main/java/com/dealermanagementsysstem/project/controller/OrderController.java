@@ -88,6 +88,10 @@ public class OrderController {
         }
 
         System.out.println(vin);
+        System.out.println(customerID);
+        System.out.println(staffID);
+        System.out.println(quotationID);
+        System.out.println(status);
 
         Integer dealerID = account.getDealerId();
 
