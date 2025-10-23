@@ -11,7 +11,7 @@ public class DAOSaleOrder {
     // ======================================================
     // 1️⃣  TẠO SALE ORDER MỚI
     // ======================================================
-    public boolean insertSaleOrder(DTOSaleOrder saleOrder) {
+    public boolean createSaleOrder(DTOSaleOrder saleOrder) {
         String sqlOrder = "INSERT INTO SaleOrder (CustomerID, DealerID, StaffID, CreatedAt, Status, TotalQuantity, TotalAmount) "
                 + "VALUES (?, ?, ?, GETDATE(), ?, ?, ?)";
         String sqlDetail = "INSERT INTO SaleOrderDetail (SaleOrderID, VIN, Price, PolicyID, Quantity) "
